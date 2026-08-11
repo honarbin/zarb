@@ -5,6 +5,8 @@ import { Zap, Clock, Trophy, Flame, RotateCcw, ArrowRight, CheckCircle2, XCircle
 import { UserStats, Question } from '../types';
 import { toPersianDigits, formatTimePersian, sounds } from '../utils/persian';
 import { generateQuestion, recordQuestionResult, saveUserStats, checkBadges } from '../utils/storage';
+import { MathFormula } from './MathFormula';
+
 
 interface SpeedChallengeProps {
   stats: UserStats;
@@ -314,15 +316,16 @@ export const SpeedChallengeView: React.FC<SpeedChallengeProps> = ({ stats, onUpd
         </div>
 
         {/* Multiplication Question */}
-        <div className="py-4 bg-purple-50 rounded-2xl border-2 border-purple-200/80 shadow-inner">
-          <div className="text-4xl sm:text-5xl font-black text-slate-900 tracking-wider flex items-center justify-center gap-3 dir-ltr">
-            <span>{toPersianDigits(currentQuestion?.factor1 ?? 1)}</span>
-            <span className="text-purple-500">×</span>
-            <span>{toPersianDigits(currentQuestion?.factor2 ?? 1)}</span>
-            <span className="text-slate-400">=</span>
-            <span className="text-purple-600 animate-pulse">؟</span>
-          </div>
+        <div className="py-4 bg-purple-50 rounded-2xl border-2 border-purple-200/80 shadow-inner flex justify-center items-center">
+          <MathFormula
+            factor1={currentQuestion?.factor1 ?? 1}
+            factor2={currentQuestion?.factor2 ?? 1}
+            answer="؟"
+            className="text-4xl sm:text-5xl text-slate-900 tracking-wider"
+            symbolColor="text-purple-500"
+          />
         </div>
+
 
         {/* Fast Choices Grid */}
         <div className="grid grid-cols-2 gap-3 pt-2">

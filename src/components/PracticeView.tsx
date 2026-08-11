@@ -5,6 +5,8 @@ import { Target, Star, Clock, Trophy, Flame, RotateCcw, ArrowRight, CheckCircle2
 import { UserStats, DifficultyLevel, Question, PracticeSummary } from '../types';
 import { toPersianDigits, formatTimePersian, sounds } from '../utils/persian';
 import { generateQuestion, recordQuestionResult, saveUserStats, checkBadges, getWeaknessList } from '../utils/storage';
+import { MathFormula } from './MathFormula';
+
 
 interface PracticeViewProps {
   stats: UserStats;
@@ -161,6 +163,10 @@ export const PracticeView: React.FC<PracticeViewProps> = ({ stats, onUpdateStats
       };
 
       setSummary(finalSummary);
+
+      if (soundEnabled) {
+        sounds.playLevelComplete();
+      }
 
       // Grand celebration confetti
       confetti({
@@ -455,15 +461,16 @@ export const PracticeView: React.FC<PracticeViewProps> = ({ stats, onUpdateStats
         </p>
 
         {/* Question Numbers Prompt */}
-        <div className="py-4 bg-amber-50 rounded-2xl border-2 border-amber-200/80 shadow-inner">
-          <div className="text-4xl sm:text-5xl font-black text-slate-900 tracking-wider flex items-center justify-center gap-3 dir-ltr">
-            <span>{toPersianDigits(currentQuestion?.factor1 ?? 1)}</span>
-            <span className="text-amber-500">×</span>
-            <span>{toPersianDigits(currentQuestion?.factor2 ?? 1)}</span>
-            <span className="text-slate-400">=</span>
-            <span className="text-amber-600 animate-pulse">؟</span>
-          </div>
+        <div className="py-4 bg-amber-50 rounded-2xl border-2 border-amber-200/80 shadow-inner flex justify-center items-center">
+          <MathFormula
+            factor1={currentQuestion?.factor1 ?? 1}
+            factor2={currentQuestion?.factor2 ?? 1}
+            answer="؟"
+            className="text-4xl sm:text-5xl text-slate-900 tracking-wider"
+            symbolColor="text-amber-500"
+          />
         </div>
+
 
         {/* Multiple Choice Options Grid */}
         <div className="grid grid-cols-2 gap-3.5 pt-2">
@@ -513,13 +520,17 @@ export const PracticeView: React.FC<PracticeViewProps> = ({ stats, onUpdateStats
             >
               <span>{feedback.message}</span>
               {!feedback.isCorrect && (
-                <span className="text-xs font-bold text-rose-700">
+                <span className="text-xs font-bold text-rose-700 flex items-center gap-1">
                   پاسخ صحیح:{' '}
-                  {toPersianDigits(currentQuestion?.factor1 ?? 1)} ×{' '}
-                  {toPersianDigits(currentQuestion?.factor2 ?? 1)} ={' '}
-                  {toPersianDigits(currentQuestion?.answer ?? 0)}
+                  <MathFormula
+                    factor1={currentQuestion?.factor1 ?? 1}
+                    factor2={currentQuestion?.factor2 ?? 1}
+                    answer={currentQuestion?.answer ?? 0}
+                    className="font-black text-rose-900"
+                  />
                 </span>
               )}
+
               {feedback.pointsEarned > 0 && (
                 <span className="text-xs bg-emerald-200 text-emerald-900 font-extrabold px-2.5 py-0.5 rounded-full mt-1">
                   +{toPersianDigits(feedback.pointsEarned)} امتیاز 🎉

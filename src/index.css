@@ -27,7 +27,21 @@
   animation: float 3s infinite ease-in-out;
 }
 
-/* Custom scrollbar for cards */
+/* LTR & Math Expression Direction Rules */
+.dir-ltr,
+.math-expression,
+.math-flex,
+[dir="ltr"] {
+  direction: ltr !important;
+  unicode-bidi: isolate !important;
+}
+
+.math-flex {
+  display: inline-flex !important;
+  flex-direction: row !important;
+  align-items: center !important;
+}
+
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;

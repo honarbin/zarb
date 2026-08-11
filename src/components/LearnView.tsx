@@ -1,20 +1,35 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { BookOpen, Volume2, ArrowRight, Grid, Sparkles, Play, CheckCircle } from 'lucide-react';
-import { toPersianDigits, sounds } from '../utils/persian';
+import { BookOpen, Volume2, Pause, ArrowRight, Grid, Sparkles, Play, CheckCircle } from 'lucide-react';
+import { toPersianDigits, sounds, useAudioState } from '../utils/persian';
+import { MathFormula } from './MathFormula';
 
 interface LearnViewProps {
   onStartTablePractice: (tableNum: number) => void;
+  onNavigateToConcept?: () => void;
 }
 
-export const LearnView: React.FC<LearnViewProps> = ({ onStartTablePractice }) => {
+export const LearnView: React.FC<LearnViewProps> = ({ onStartTablePractice, onNavigateToConcept }) => {
   const [selectedTable, setSelectedTable] = useState<number | null>(null);
   const [activeVisualPair, setActiveVisualPair] = useState<{ f1: number; f2: number } | null>(null);
+  const [showPreLesson, setShowPreLesson] = useState<boolean>(true);
+  const [expandedMultiplier, setExpandedMultiplier] = useState<number | null>(null);
 
-  // Read row aloud in Persian
+  const { isPlaying, speakTraditionalMultiplication, stopSpeech } = useAudioState();
+
+  // Read row aloud in traditional Persian rhythmic phrasing (e.g. "دو دوتا، چهارتا")
   const handleSpeakRow = (f1: number, f2: number) => {
-    const text = `${toPersianDigits(f1)} ضرب در ${toPersianDigits(f2)} می‌شود ${toPersianDigits(f1 * f2)}`;
-    sounds.speakPersian(text);
+    const rowId = `learn-table-${f1}-${f2}`;
+    if (isPlaying(rowId)) {
+      stopSpeech();
+    } else {
+      speakTraditionalMultiplication(f1, f2, rowId);
+    }
+  };
+
+  const handleToggleCard = (f2: number) => {
+    stopSpeech();
+    setExpandedMultiplier((prev) => (prev === f2 ? null : f2));
   };
 
   // Table Cards Overview
@@ -22,6 +37,29 @@ export const LearnView: React.FC<LearnViewProps> = ({ onStartTablePractice }) =>
     return (
       <div className="max-w-xl mx-auto px-4 py-6 pb-24 space-y-6">
         
+        {/* Concept Link Banner */}
+        {onNavigateToConcept && (
+          <div className="bg-gradient-to-r from-amber-400 via-orange-400 to-amber-500 text-slate-950 p-4 rounded-3xl shadow-md border-4 border-amber-300 flex items-center justify-between gap-3">
+            <div className="space-y-1">
+              <span className="bg-amber-100 text-amber-950 text-[10px] font-black px-2.5 py-0.5 rounded-full">
+                پیش‌نیاز مهم 💡
+              </span>
+              <h3 className="text-sm font-black text-slate-950">
+                آموزش مفهوم ضرب (جمع تکراری)
+              </h3>
+              <p className="text-[11px] font-bold text-amber-950">
+                قبل از حفظ کردن جدول، مفهوم گروه‌بندی را یاد بگیر!
+              </p>
+            </div>
+            <button
+              onClick={onNavigateToConcept}
+              className="px-3.5 py-2.5 bg-slate-950 text-amber-300 hover:bg-slate-900 rounded-2xl font-black text-xs shadow-sm cursor-pointer shrink-0"
+            >
+              شروع مفهوم ←
+            </button>
+          </div>
+        )}
+
         {/* Banner */}
         <div className="bg-gradient-to-br from-sky-400 via-blue-500 to-indigo-500 text-white rounded-3xl p-6 shadow-lg border-4 border-sky-300 relative overflow-hidden space-y-2">
           <span className="bg-white/20 text-white text-xs font-black px-3 py-1 rounded-full shadow-sm">
@@ -91,7 +129,11 @@ export const LearnView: React.FC<LearnViewProps> = ({ onStartTablePractice }) =>
       {/* Top Header Navigation */}
       <div className="flex items-center justify-between">
         <button
-          onClick={() => setSelectedTable(null)}
+          onClick={() => {
+            stopSpeech();
+            setSelectedTable(null);
+            setExpandedMultiplier(null);
+          }}
           className="flex items-center gap-1 text-slate-700 bg-white hover:bg-slate-100 px-3.5 py-2 rounded-2xl border-2 border-slate-200 font-bold text-xs shadow-sm cursor-pointer"
         >
           <ArrowRight className="w-4 h-4" />
@@ -111,101 +153,229 @@ export const LearnView: React.FC<LearnViewProps> = ({ onStartTablePractice }) =>
       <div className="bg-gradient-to-r from-sky-500 to-blue-600 text-white rounded-3xl p-5 shadow-lg border-4 border-sky-300 flex items-center justify-between">
         <div>
           <span className="text-xs bg-white/20 px-2.5 py-0.5 rounded-full font-bold">
-            یادگیری دقیق
+            یادگیری دقیق با کارت‌های بازشونده
           </span>
           <h2 className="text-2xl font-black text-white tracking-tight mt-1">
             جدول ضرب {toPersianDigits(selectedTable)} 🌟
           </h2>
         </div>
-        <div className="text-4xl bg-white/10 p-3 rounded-2xl">
+        <div className="text-4xl bg-white/10 p-3 rounded-2xl font-black">
           {toPersianDigits(selectedTable)}×
         </div>
       </div>
 
-      {/* Visual Dot Grid Demonstrator (Interactive Matrix) */}
-      {activeVisualPair && (
-        <div className="bg-white rounded-2xl p-4 shadow-md border-2 border-sky-200 text-center space-y-3">
-          <div className="flex items-center justify-center gap-2 text-xs font-black text-slate-700">
-            <Grid className="w-4 h-4 text-sky-500" />
-            <span>
-              نمایش تصویری ضرب:{' '}
-              <strong className="text-sky-600 text-sm">
-                {toPersianDigits(activeVisualPair.f1)} دسته‌ی {toPersianDigits(activeVisualPair.f2)}‌تایی
-              </strong>{' '}
-              = {toPersianDigits(activeVisualPair.f1 * activeVisualPair.f2)}
-            </span>
+      {/* Short Conceptual Lesson Card Before Practice */}
+      <div className="bg-amber-50 rounded-2xl p-4 border-2 border-amber-300 space-y-2">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2 text-amber-950 font-black text-xs">
+            <Sparkles className="w-4 h-4 text-amber-600" />
+            <span>درس مفهومی کوتاه جدول {toPersianDigits(selectedTable)} (جمع تکراری)</span>
           </div>
-
-          {/* Render Dot Grid */}
-          <div className="bg-sky-50/80 p-3 rounded-xl border border-sky-100 flex flex-col items-center justify-center gap-1.5 max-h-48 overflow-y-auto">
-            {Array.from({ length: Math.min(activeVisualPair.f1, 10) }).map((_, r) => (
-              <div key={r} className="flex gap-1.5">
-                {Array.from({ length: Math.min(activeVisualPair.f2, 10) }).map((_, c) => (
-                  <motion.div
-                    key={c}
-                    initial={{ scale: 0 }}
-                    animate={{ scale: 1 }}
-                    transition={{ delay: (r * 10 + c) * 0.01 }}
-                    className="w-5 h-5 rounded-full bg-sky-500 text-white text-[10px] font-black flex items-center justify-center shadow-xs"
-                  >
-                    ⭐
-                  </motion.div>
-                ))}
-              </div>
-            ))}
-          </div>
+          <button
+            onClick={() => setShowPreLesson(!showPreLesson)}
+            className="text-[11px] font-bold text-amber-800 underline cursor-pointer"
+          >
+            {showPreLesson ? 'بستن درس' : 'نمایش ساختار جمع'}
+          </button>
         </div>
-      )}
 
-      {/* Multiplication Items List */}
-      <div className="bg-white rounded-3xl p-4 shadow-md border-2 border-sky-200 divide-y divide-slate-100">
+        {showPreLesson && (
+          <div className="bg-white/90 p-3 rounded-xl border border-amber-200 text-xs font-bold text-slate-800 space-y-1.5">
+            <p className="text-[11px] text-slate-600 font-medium">
+              قبل از حفظ کردن، ببین چطور اعداد با جمع تکراری بزرگتر می‌شوند:
+            </p>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5 pt-1">
+              {Array.from({ length: 4 }, (_, i) => i + 1).map((multiplier) => {
+                const repeatedSum = Array.from({ length: multiplier })
+                  .map(() => toPersianDigits(selectedTable))
+                  .join(' + ');
+                return (
+                  <div key={multiplier} className="bg-amber-100/60 p-2 rounded-lg border border-amber-200 flex items-center justify-between gap-2">
+                    <MathFormula factor1={selectedTable} factor2={multiplier} className="text-amber-900 font-black text-xs" />
+                    <span className="text-slate-700 text-[11px] math-flex dir-ltr" style={{ direction: 'ltr', unicodeBidi: 'isolate' }}>
+                      {repeatedSum} = <strong className="text-amber-900">{toPersianDigits(selectedTable * multiplier)}</strong>
+                    </span>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* Multiplication Accordion List */}
+      <div className="space-y-3">
         {Array.from({ length: 10 }, (_, i) => i + 1).map((f2) => {
           const result = selectedTable * f2;
-          const isSelectedPair = activeVisualPair?.f1 === selectedTable && activeVisualPair?.f2 === f2;
+          const isExpanded = expandedMultiplier === f2;
+          const rowId = `learn-table-${selectedTable}-${f2}`;
+          const isRowPlaying = isPlaying(rowId);
 
           return (
-            <div
+            <motion.div
               key={f2}
-              onClick={() => setActiveVisualPair({ f1: selectedTable, f2 })}
-              className={`py-3 px-3 rounded-2xl flex items-center justify-between transition-colors cursor-pointer ${
-                isSelectedPair ? 'bg-sky-100/80 border-2 border-sky-300 shadow-sm' : 'hover:bg-slate-50'
+              layout
+              className={`rounded-2xl border-2 transition-all overflow-hidden ${
+                isExpanded
+                  ? 'bg-white border-amber-400 shadow-lg ring-2 ring-amber-200'
+                  : 'bg-white border-sky-100 hover:border-sky-300 shadow-sm'
               }`}
             >
-              {/* Formula */}
-              <div className="flex items-center gap-3 dir-ltr text-lg font-black text-slate-800">
-                <span className="w-8 text-center text-sky-600 font-extrabold">{toPersianDigits(selectedTable)}</span>
-                <span className="text-slate-400">×</span>
-                <span className="w-8 text-center text-slate-700">{toPersianDigits(f2)}</span>
-                <span className="text-slate-400">=</span>
-                <span className="text-emerald-600 font-black text-xl">{toPersianDigits(result)}</span>
-              </div>
+              {/* Card Header Bar */}
+              <button
+                type="button"
+                onClick={() => handleToggleCard(f2)}
+                className="w-full p-4 flex items-center justify-between cursor-pointer text-right bg-transparent"
+              >
+                <div className="flex items-center gap-3">
+                  <div
+                    className={`w-10 h-10 rounded-xl flex items-center justify-center font-black text-sm transition-colors ${
+                      isExpanded ? 'bg-amber-500 text-slate-950' : 'bg-sky-100 text-sky-800'
+                    }`}
+                  >
+                    {toPersianDigits(f2)}
+                  </div>
+                  
+                  {/* Card header formula view - always show full equation */}
+                  <MathFormula
+                    factor1={selectedTable}
+                    factor2={f2}
+                    answer={result}
+                    className="text-lg font-black text-slate-800"
+                    symbolColor="text-amber-500"
+                  />
+                </div>
 
-              {/* Controls */}
-              <div className="flex items-center gap-2">
-                <button
-                  type="button"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleSpeakRow(selectedTable, f2);
-                  }}
-                  className="w-8 h-8 rounded-xl bg-sky-50 hover:bg-sky-200 text-sky-700 flex items-center justify-center transition-colors cursor-pointer"
-                  title="خواندن صوتی"
-                >
-                  <Volume2 className="w-4 h-4" />
-                </button>
+                <div className="flex items-center gap-2">
+                  <span
+                    className={`text-xs font-black px-3 py-1.5 rounded-xl transition-colors ${
+                      isExpanded
+                        ? 'bg-amber-100 text-amber-950'
+                        : 'bg-slate-100 text-slate-600 hover:bg-sky-100 hover:text-sky-800'
+                    }`}
+                  >
+                    {isExpanded ? 'بستن ▲' : 'مشاهده و پخش ▼'}
+                  </span>
+                </div>
+              </button>
 
-                <button
-                  type="button"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setActiveVisualPair({ f1: selectedTable, f2 });
-                  }}
-                  className="text-xs font-bold text-sky-700 bg-sky-100 px-2.5 py-1 rounded-xl"
-                >
-                  نمایش اشکال
-                </button>
-              </div>
-            </div>
+              {/* Accordion Expandable Content Body */}
+              <AnimatePresence>
+                {isExpanded && (
+                  <motion.div
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: 'auto' }}
+                    exit={{ opacity: 0, height: 0 }}
+                    transition={{ duration: 0.25, ease: 'easeInOut' }}
+                    className="px-4 pb-5 pt-1 bg-amber-50/40 border-t border-amber-100 space-y-4"
+                  >
+                    {/* Full Formula & Result Display */}
+                    <div className="bg-white p-4 rounded-2xl border-2 border-amber-200/80 shadow-xs text-center space-y-1">
+                      <div className="text-xs font-bold text-amber-800">عبارت ریاضی:</div>
+                      <div className="flex justify-center items-center py-1">
+                        <MathFormula
+                          factor1={selectedTable}
+                          factor2={f2}
+                          answer={result}
+                          className="text-3xl sm:text-4xl text-slate-900 tracking-wide font-black"
+                          symbolColor="text-amber-500"
+                        />
+                      </div>
+                      <div className="text-xs font-extrabold text-slate-700 bg-amber-100/70 py-1.5 px-3 rounded-xl inline-block border border-amber-200">
+                        {toPersianDigits(selectedTable)} دسته‌ی {toPersianDigits(f2)}‌تایی = {toPersianDigits(result)}
+                      </div>
+                    </div>
+
+                    {/* Visual Dot / Star Representation with Compact Touching Outlined Groups */}
+                    <div className="bg-white p-4 rounded-2xl border border-amber-200 text-center space-y-3">
+                      <div className="flex items-center justify-between text-xs font-black text-slate-700 border-b border-amber-100 pb-2">
+                        <div className="flex items-center gap-1.5">
+                          <Grid className="w-4 h-4 text-amber-500" />
+                          <span>نمایش تصویری</span>
+                        </div>
+                        <span className="bg-amber-100 text-amber-900 px-2.5 py-0.5 rounded-full text-[11px] font-extrabold">
+                          {toPersianDigits(selectedTable)} دسته‌ی {toPersianDigits(f2)}‌تایی
+                        </span>
+                      </div>
+
+                      {/* Touching contiguous group boxes container - zero gap/margin */}
+                      <div className="bg-amber-50/70 p-3 rounded-xl border border-amber-200 flex flex-wrap justify-center items-stretch gap-0 max-h-72 overflow-y-auto">
+                        {Array.from({ length: selectedTable }).map((_, groupIdx) => {
+                          // Determine compact grid column layout for items inside each group
+                          const getItemCols = (count: number) => {
+                            if (count <= 3) return count;
+                            if (count === 4) return 2;
+                            if (count === 5) return 5;
+                            if (count === 6) return 3;
+                            if (count === 7 || count === 8) return 4;
+                            if (count === 9) return 3;
+                            return 5; // 10 items -> 2 rows of 5
+                          };
+
+                          const cols = getItemCols(f2);
+
+                          return (
+                            <div
+                              key={groupIdx}
+                              className="p-2 bg-white border border-amber-400/80 -mr-[1px] -mb-[1px] flex flex-col items-center justify-center transition-colors hover:bg-amber-50/40"
+                            >
+                              <div className="text-[10px] font-black text-amber-950 bg-amber-100/90 px-1.5 py-0.5 rounded-xs mb-1.5 border border-amber-300/70">
+                                دسته‌ی {toPersianDigits(groupIdx + 1)}
+                              </div>
+
+                              <div
+                                className="grid gap-1 justify-items-center items-center"
+                                style={{ gridTemplateColumns: `repeat(${cols}, minmax(0, 1fr))` }}
+                              >
+                                {Array.from({ length: f2 }).map((_, itemIdx) => (
+                                  <motion.div
+                                    key={itemIdx}
+                                    initial={{ scale: 0 }}
+                                    animate={{ scale: 1 }}
+                                    transition={{ delay: (groupIdx * f2 + itemIdx) * 0.005 }}
+                                    className="w-5.5 h-5.5 rounded-full bg-amber-400 border border-amber-500 text-slate-950 text-[10px] font-black flex items-center justify-center shadow-2xs"
+                                  >
+                                    ⭐
+                                  </motion.div>
+                                ))}
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+
+                    {/* Audio Playback Control */}
+                    <div className="flex justify-center pt-1">
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleSpeakRow(selectedTable, f2);
+                        }}
+                        className={`w-full sm:w-auto px-6 py-3 rounded-2xl flex items-center justify-center gap-2.5 font-black text-sm shadow-md transition-all cursor-pointer ${
+                          isRowPlaying
+                            ? 'bg-amber-500 text-slate-950 ring-4 ring-amber-200 animate-pulse scale-102'
+                            : 'bg-sky-500 hover:bg-sky-600 text-white'
+                        }`}
+                      >
+                        {isRowPlaying ? (
+                          <Pause className="w-5 h-5 fill-slate-950" />
+                        ) : (
+                          <Volume2 className="w-5 h-5" />
+                        )}
+                        <span>
+                          {isRowPlaying
+                            ? 'توقف پخش'
+                            : '🔊 پخش صدا'}
+                        </span>
+                      </button>
+                    </div>
+
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </motion.div>
           );
         })}
       </div>
