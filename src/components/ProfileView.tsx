@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { User, Award, BrainCircuit, Edit2, Check, Sparkles, AlertCircle, Play } from 'lucide-react';
 import { UserStats, Badge, DifficultyLevel } from '../types';
 import { toPersianDigits, sounds } from '../utils/persian';
+import { MathFormula } from './MathFormula';
 import { ALL_BADGES, getWeaknessList, saveUserStats } from '../utils/storage';
 
 interface ProfileViewProps {
@@ -180,8 +181,8 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
               <div className="flex items-center gap-3">
                 <span className="text-lg font-black text-rose-600">⭐</span>
                 <div className="text-right">
-                  <span className="text-xl font-black text-slate-900 dir-ltr inline-block">
-                    {toPersianDigits(item.factor1)} × {toPersianDigits(item.factor2)}
+                  <span className="text-xl font-black text-slate-900 flex items-center justify-end dir-ltr">
+                    <MathFormula factor1={item.factor1} factor2={item.factor2} />
                   </span>
                   <p className="text-[11px] text-slate-500 font-bold mt-0.5">
                     تلاش: {toPersianDigits(item.attempts)} | صحیح: {toPersianDigits(item.correct)} | غلط: {toPersianDigits(item.wrong)}

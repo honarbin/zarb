@@ -95,7 +95,7 @@ export const ConceptView: React.FC<ConceptViewProps> = ({
       groupSize: 3,
       total: 15,
       correctOption: '5x3',
-      explanation: '۵ بار عدد ۳ جمع شده است، یعنی ۵ گروه ۳‌تایی که معادل ۵ × ۳ است.',
+      explanation: '۵ بار عدد ۳ جمع شده است، یعنی ۵ گروه ۳‌تایی که معادل ۵ ضربدر ۳ است.',
     },
     {
       additionStr: '۴ + ۴',
@@ -104,7 +104,7 @@ export const ConceptView: React.FC<ConceptViewProps> = ({
       groupSize: 4,
       total: 8,
       correctOption: '2x4',
-      explanation: '۲ بار عدد ۴ جمع شده است، یعنی ۲ گروه ۴‌تایی که معادل ۲ × ۴ است.',
+      explanation: '۲ بار عدد ۴ جمع شده است، یعنی ۲ گروه ۴‌تایی که معادل ۲ ضربدر ۴ است.',
     },
   ];
   const currentQuiz = quizQuestions[quizIndex % quizQuestions.length];
@@ -184,14 +184,14 @@ export const ConceptView: React.FC<ConceptViewProps> = ({
       confetti({ particleCount: 80, spread: 70, origin: { y: 0.6 } });
       setGroupFeedback({
         isCorrect: true,
-        msg: `فوق‌العاده بود! ${toPersianDigits(currentChallenge.groups)} × ${toPersianDigits(currentChallenge.itemsPerGroup)} = ${toPersianDigits(targetTotal)}`,
+        msg: `فوق‌العاده بود! ${toPersianDigits(currentChallenge.groups)} ضربدر ${toPersianDigits(currentChallenge.itemsPerGroup)} = ${toPersianDigits(targetTotal)}`,
       });
       setGroupGameStep('done');
     } else {
       sounds.playWrongSound();
       setGroupFeedback({
         isCorrect: false,
-        msg: `دوباره بررسی کن! حاصل ضرب ${toPersianDigits(currentChallenge.groups)} × ${toPersianDigits(currentChallenge.itemsPerGroup)} می‌شود ${toPersianDigits(targetTotal)}.`,
+        msg: `دوباره بررسی کن! حاصل ضرب ${toPersianDigits(currentChallenge.groups)} ضربدر ${toPersianDigits(currentChallenge.itemsPerGroup)} می‌شود ${toPersianDigits(targetTotal)}.`,
       });
     }
   };
@@ -344,7 +344,7 @@ export const ConceptView: React.FC<ConceptViewProps> = ({
             </div>
 
             <p className="text-xs text-slate-700 leading-relaxed font-bold">
-              وقتی با عبارت <strong className="text-amber-700 text-sm">۳ × ۴</strong> مواجه می‌شویم، یعنی:
+              وقتی با عبارت <strong className="text-amber-700 text-sm">۳ ضربدر ۴</strong> مواجه می‌شویم، یعنی:
               <br />
               «۳ گروه داریم و در هر گروه ۴ تاست.»
             </p>
@@ -605,7 +605,7 @@ export const ConceptView: React.FC<ConceptViewProps> = ({
                     'در این مرحله کودک با شمردن تک‌تک سیب‌ها، گردوها یا اسباب‌بازی‌ها یاد می‌گیرد که تعداد کُلی از مجموع اشیا به دست می‌آید.',
                     'کودک اشیا را درون بشقاب‌ها یا گروه‌های برابر تقسیم می‌کند تا مفهوم «تعداد گروه‌ها» را ملموس لمس کند.',
                     'کودک به‌جای شمردن تک‌تک، جمع‌های تکراری مثل ۵ + ۵ + ۵ را انجام می‌دهد.',
-                    'کودک علامت × را یاد می‌گیرد و می‌فهمد ۳ × ۵ یعنی ۳ گروه ۵‌تایی.',
+                    'کودک علامت × را یاد می‌گیرد و می‌فهمد ۳ ضربدر ۵ یعنی ۳ گروه ۵‌تایی.',
                     'تصاویر حذف می‌شوند و کودک با تجسم گروه‌ها پاسخ را در ذهن محاسبه می‌کند.',
                     'با تمرین‌های جذاب و سرعتی، جدول ضرب به حافظه بلندمدت منتقل می‌شود.',
                   ][selectedStep - 1]
@@ -937,7 +937,7 @@ export const ConceptView: React.FC<ConceptViewProps> = ({
               <div className="bg-white/80 p-3 rounded-xl border border-slate-200 text-slate-800 space-y-1">
                 <div className="font-black text-slate-900">توضیح مفهومی:</div>
                 <p>
-                  هرچند حاصل ضرب هر دو گزینه برابر با {toPersianDigits(currentQuiz.total)} است، اما چیدمان تصویری {toPersianDigits(currentQuiz.numGroups)} گروه {toPersianDigits(currentQuiz.groupSize)}‌تایی مشخصاً برابر با عبارت <strong className="text-sky-700 dir-ltr inline-block">{toPersianDigits(currentQuiz.numGroups)} × {toPersianDigits(currentQuiz.groupSize)}</strong> می‌باشد.
+                  هرچند حاصل ضرب هر دو گزینه برابر با {toPersianDigits(currentQuiz.total)} است، اما چیدمان تصویری {toPersianDigits(currentQuiz.numGroups)} گروه {toPersianDigits(currentQuiz.groupSize)}‌تایی مشخصاً برابر با عبارت <strong className="text-sky-700 font-black">{toPersianDigits(currentQuiz.numGroups)} ضربدر {toPersianDigits(currentQuiz.groupSize)}</strong> می‌باشد.
                 </p>
               </div>
 
@@ -1003,8 +1003,8 @@ export const ConceptView: React.FC<ConceptViewProps> = ({
                     <span className="w-6 h-6 rounded-full bg-purple-200 text-purple-900 text-[10px] font-black flex items-center justify-center">
                       {toPersianDigits(factor2)}
                     </span>
-                    <span className="text-purple-950 font-black dir-ltr inline-block">
-                      {toPersianDigits(preTableNum)} × {toPersianDigits(factor2)}
+                    <span className="text-purple-950 font-black flex items-center gap-1 dir-ltr">
+                      <MathFormula factor1={preTableNum} factor2={factor2} />
                     </span>
                   </div>
 

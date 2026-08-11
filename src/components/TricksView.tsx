@@ -56,14 +56,14 @@ export const TRICK_LIST: TrickDef[] = [
     categoryLabel: 'روش همیشگی',
     icon: '☝️',
     shortDesc: 'هر عددی که ضرب در ۱ شود، حاصل خودش می‌شود!',
-    exampleStr: '۷ × ۱ = ۷',
+    exampleStr: '۷ ضربدر ۱ = ۷',
     explanation: 'ضرب در ۱ یعنی فقط ۱ گروه از آن عدد داریم، پس هیچی تغییر نمی‌کند.',
     steps: [
       'عدد اولیه را نگاه کن (مثلاً ۷).',
       'چون ۱ گروه داریم، همان عدد ۷ را در پاسخ بنویس!'
     ],
     testQuestion: {
-      prompt: 'با ترفند ضرب در ۱، حاصل ضرب ۹ × ۱ چقدر می‌شود؟',
+      prompt: 'با ترفند ضرب در ۱، حاصل ضرب ۹ ضربدر ۱ چقدر می‌شود؟',
       f1: 9,
       f2: 1,
       correctAnswer: 9,
@@ -78,14 +78,14 @@ export const TRICK_LIST: TrickDef[] = [
     categoryLabel: 'روش همیشگی',
     icon: '✌️',
     shortDesc: 'ضرب در ۲ یعنی عدد را دو بار با خودش جمع کن (دو برابر کردن).',
-    exampleStr: '۷ × ۲ = ۷ + ۷ = ۱۴',
+    exampleStr: '۷ ضربدر ۲ = ۷ + ۷ = ۱۴',
     explanation: 'به‌جای جدول ضرب، فقط کافیست عدد را با خودش جمع کنی.',
     steps: [
       'عدد را دو بار کنار هم بنویس: ۷ + ۷',
       'حاصل جمع را حساب کن: ۱۴'
     ],
     testQuestion: {
-      prompt: 'با ترفند دو برابر کردن، حاصل ۶ × ۲ چند می‌شود؟',
+      prompt: 'با ترفند دو برابر کردن، حاصل ۶ ضربدر ۲ چند می‌شود؟',
       f1: 6,
       f2: 2,
       correctAnswer: 12,
@@ -100,14 +100,14 @@ export const TRICK_LIST: TrickDef[] = [
     categoryLabel: 'روش همیشگی',
     icon: '🖐️',
     shortDesc: 'حاصل ضرب هر عدد در ۵، همیشه به رقم ۰ یا ۵ ختم می‌شود!',
-    exampleStr: '۶ × ۵ = ۳۰  |  ۷ × ۵ = ۳۵',
+    exampleStr: '۶ ضربدر ۵ = ۳۰  |  ۷ ضربدر ۵ = ۳۵',
     explanation: 'اگر عدد زوج باشد حاصل به ۰ ختم می‌شود؛ اگر فرد باشد حاصل به ۵ ختم می‌شود.',
     steps: [
-      'عدد فرد × ۵ ➔ پایان با ۵ (مثلاً ۷ × ۵ = ۳۵)',
-      'عدد زوج × ۵ ➔ پایان با ۰ (مثلاً ۶ × ۵ = ۳۰)'
+      'عدد فرد ضربدر ۵ ➔ پایان با ۵ (مثلاً ۷ ضربدر ۵ = ۳۵)',
+      'عدد زوج ضربدر ۵ ➔ پایان با ۰ (مثلاً ۶ ضربدر ۵ = ۳۰)'
     ],
     testQuestion: {
-      prompt: 'با ترفند ضرب در ۵، حاصل ۸ × ۵ چند می‌شود؟ (چون ۸ زوج است، باید به ۰ ختم شود)',
+      prompt: 'با ترفند ضرب در ۵، حاصل ۸ ضربدر ۵ چند می‌شود؟ (چون ۸ زوج است، باید به ۰ ختم شود)',
       f1: 8,
       f2: 5,
       correctAnswer: 40,
@@ -122,14 +122,14 @@ export const TRICK_LIST: TrickDef[] = [
     categoryLabel: 'روش همیشگی',
     icon: '🚀',
     shortDesc: 'ضرب در ۱۰ خیلی ساده است! فقط یک صفر جلوی عدد بگذار.',
-    exampleStr: '۸ × ۱۰ = ۸۰',
+    exampleStr: '۸ ضربدر ۱۰ = ۸۰',
     explanation: 'هر عددی که در ۱۰ ضرب شود، یک مرتبه به چپ می‌رود و یک صفر در جلوی آن می‌نشیند.',
     steps: [
       'عدد اصلی را بنویس (مثلاً ۸).',
       'یک صفر ۰ به سمت راست آن بچسبان ➔ ۸۰'
     ],
     testQuestion: {
-      prompt: 'با ترفند اضافه کردن صفر، حاصل ۹ × ۱۰ چند می‌شود؟',
+      prompt: 'با ترفند اضافه کردن صفر، حاصل ۹ ضربدر ۱۰ چند می‌شود؟',
       f1: 9,
       f2: 10,
       correctAnswer: 90,
@@ -144,15 +144,15 @@ export const TRICK_LIST: TrickDef[] = [
     categoryLabel: 'اعداد ویژه (۹)',
     icon: '🖐️✨',
     shortDesc: 'با ۱۰ انگشت دستت، تمام ضرب‌های جدول ۹ را در ۳ ثانیه بگو!',
-    exampleStr: '۹ × ۴ = ۳۶ (انگشت ۴ام خُم می‌شود: ۳ انگشت سمت راست، ۶ انگشت سمت چپ)',
-    explanation: 'دست‌هایت را باز کن. برای ضرب ۹ × N، انگشت Nام را بخوابان. انگشتان سمت چپ دهگان و سمت راست یکان هستند.',
+    exampleStr: '۹ ضربدر ۴ = ۳۶ (انگشت ۴ام خم می‌شود: ۳ انگشت سمت راست، ۶ انگشت سمت چپ)',
+    explanation: 'دست‌هایت را باز کن. برای ضرب ۹ ضربدر N، انگشت Nام را بخوابان. انگشتان سمت چپ دهگان و سمت راست یکان هستند.',
     steps: [
       '۱۰ انگشت دست را باز کن.',
       'انگشت شماره N را بخوابان.',
       'تعداد انگشتان سمت راست = دهگان | تعداد انگشتان سمت چپ = یکان!'
     ],
     testQuestion: {
-      prompt: 'با روش انگشتی، برای ۹ × ۵ کدام انگشت خوابیده و حاصل چند می‌شود؟',
+      prompt: 'با روش انگشتی، برای ۹ ضربدر ۵ کدام انگشت خوابیده و حاصل چند می‌شود؟',
       f1: 9,
       f2: 5,
       correctAnswer: 45,
@@ -167,19 +167,19 @@ export const TRICK_LIST: TrickDef[] = [
     categoryLabel: 'روش همیشگی',
     icon: '⚡',
     shortDesc: 'ضرب در ۴ یعنی ۲ بار عدد را دو برابر کن!',
-    exampleStr: '۶ × ۴ ➔ ۶ × ۲ = ۱۲ ➔ ۱۲ × ۲ = ۲۴',
+    exampleStr: '۶ ضربدر ۴ ➔ ۶ ضربدر ۲ = ۱۲ ➔ ۱۲ ضربدر ۲ = ۲۴',
     explanation: 'به‌جای حفظ جدول ۴، ابتدا عدد را با خودش جمع کن، سپس حاصل را دوباره با خودش جمع کن.',
     steps: [
       'مرحله ۱: ۶ را دو برابر کن ➔ ۱۲',
       'مرحله ۲: ۱۲ را دوباره دو برابر کن ➔ ۲۴'
     ],
     testQuestion: {
-      prompt: 'با دو بار دو برابر کردن، حاصل ۷ × ۴ چند می‌شود؟ (۷ ➔ ۱۴ ➔ ؟)',
+      prompt: 'با دو بار دو برابر کردن، حاصل ۷ ضربدر ۴ چند می‌شود؟ (۷ ➔ ۱۴ ➔ ؟)',
       f1: 7,
       f2: 4,
       correctAnswer: 28,
       options: [24, 28, 32, 14],
-      hint: '۷ × ۲ = ۱۴، حالا ۱۴ + ۱۴ = ۲۸'
+      hint: '۷ ضربدر ۲ = ۱۴، حالا ۱۴ + ۱۴ = ۲۸'
     }
   },
   {
@@ -189,20 +189,20 @@ export const TRICK_LIST: TrickDef[] = [
     categoryLabel: 'روش همیشگی',
     icon: '🔥',
     shortDesc: 'ضرب در ۸ یعنی ۳ بار پشت سر هم عدد را دو برابر کن!',
-    exampleStr: '۳ × ۸ ➔ ۳ ➔ ۶ ➔ ۱۲ ➔ ۲۴',
-    explanation: 'چون ۸ یعنی ۲ × ۲ × ۲، پس سه بار دو برابر کردن حاصل دقیق ضرب در ۸ را می‌دهد.',
+    exampleStr: '۳ ضربدر ۸ ➔ ۳ ➔ ۶ ➔ ۱۲ ➔ ۲۴',
+    explanation: 'چون ۸ یعنی ۲ ضربدر ۲ ضربدر ۲، پس سه بار دو برابر کردن حاصل دقیق ضرب در ۸ را می‌دهد.',
     steps: [
-      'مرحله ۱: ۳ × ۲ = ۶',
-      'مرحله ۲: ۶ × ۲ = ۱۲',
-      'مرحله ۳: ۱۲ × ۲ = ۲۴'
+      'مرحله ۱: ۳ ضربدر ۲ = ۶',
+      'مرحله ۲: ۶ ضربدر ۲ = ۱۲',
+      'مرحله ۳: ۱۲ ضربدر ۲ = ۲۴'
     ],
     testQuestion: {
-      prompt: 'با سه بار دو برابر کردن، حاصل ۵ × ۸ چند می‌شود؟ (۵ ➔ ۱۰ ➔ ۲۰ ➔ ؟)',
+      prompt: 'با سه بار دو برابر کردن، حاصل ۵ ضربدر ۸ چند می‌شود؟ (۵ ➔ ۱۰ ➔ ۲۰ ➔ ؟)',
       f1: 5,
       f2: 8,
       correctAnswer: 40,
       options: [35, 40, 48, 50],
-      hint: '۵ × ۲ = ۱۰ ➔ ۱۰ × ۲ = ۲۰ ➔ ۲۰ × ۲ = ۴۰'
+      hint: '۵ ضربدر ۲ = ۱۰ ➔ ۱۰ ضربدر ۲ = ۲۰ ➔ ۲۰ ضربدر ۲ = ۴۰'
     }
   },
   {
@@ -212,19 +212,19 @@ export const TRICK_LIST: TrickDef[] = [
     categoryLabel: 'روش همیشگی',
     icon: '🧩',
     shortDesc: 'ابتدا عدد را در ۵ ضرب کن، سپس ۱ بار خود عدد را به آن اضافه کن!',
-    exampleStr: '۷ × ۶ ➔ (۷ × ۵) + ۷ = ۳۵ + ۷ = ۴۲',
+    exampleStr: '۷ ضربدر ۶ ➔ (۷ ضربدر ۵) + ۷ = ۳۵ + ۷ = ۴۲',
     explanation: 'چون ضرب در ۵ خیلی آسان است، ابتدا ضرب در ۵ کن و سپس یک گروه اضافه کن.',
     steps: [
-      'مرحله ۱: ۷ × ۵ = ۳۵',
+      'مرحله ۱: ۷ ضربدر ۵ = ۳۵',
       'مرحله ۲: ۳۵ + ۷ = ۴۲'
     ],
     testQuestion: {
-      prompt: 'با ترفند (ضرب در ۵ + خود عدد)، حاصل ۸ × ۶ چند می‌شود؟',
+      prompt: 'با ترفند (ضرب در ۵ + خود عدد)، حاصل ۸ ضربدر ۶ چند می‌شود؟',
       f1: 8,
       f2: 6,
       correctAnswer: 48,
       options: [42, 48, 54, 40],
-      hint: '۸ × ۵ = ۴۰، حالا ۴۰ + ۸ = ۴۸'
+      hint: '۸ ضربدر ۵ = ۴۰، حالا ۴۰ + ۸ = ۴۸'
     }
   },
   {
@@ -234,19 +234,19 @@ export const TRICK_LIST: TrickDef[] = [
     categoryLabel: 'اعداد ویژه (۹)',
     icon: '🎯',
     shortDesc: 'عدد را در ۱۰ ضرب کن و سپس خود عدد را از آن کم کن!',
-    exampleStr: '۷ × ۹ ➔ (۷ × ۱۰) - ۷ = ۷۰ - ۷ = ۶۳',
+    exampleStr: '۷ ضربدر ۹ ➔ (۷ ضربدر ۱۰) - ۷ = ۷۰ - ۷ = ۶۳',
     explanation: 'چون ۹ فقط ۱ واحد از ۱۰ کمتر است، ضرب در ۱۰ کن و ۱ بار عدد را تفریق کن.',
     steps: [
-      'مرحله ۱: ۷ × ۱۰ = ۷۰',
+      'مرحله ۱: ۷ ضربدر ۱۰ = ۷۰',
       'مرحله ۲: ۷۰ - ۷ = ۶۳'
     ],
     testQuestion: {
-      prompt: 'با ترفند (ضرب در ۱۰ منهای خود عدد)، حاصل ۶ × ۹ چند می‌شود؟',
+      prompt: 'با ترفند (ضرب در ۱۰ منهای خود عدد)، حاصل ۶ ضربدر ۹ چند می‌شود؟',
       f1: 6,
       f2: 9,
       correctAnswer: 54,
       options: [54, 60, 48, 56],
-      hint: '۶ × ۱۰ = ۶۰، حالا ۶۰ - ۶ = ۵۴'
+      hint: '۶ ضربدر ۱۰ = ۶۰، حالا ۶۰ - ۶ = ۵۴'
     }
   },
   {
@@ -256,7 +256,7 @@ export const TRICK_LIST: TrickDef[] = [
     categoryLabel: 'اعداد دو رقمی',
     icon: '🔮',
     shortDesc: 'رقم‌های عدد را از هم باز کن و مجموعشان را وسط بگذار!',
-    exampleStr: '۲۳ × ۱۱ ➔ ۲ (۲+۳) ۳ ➔ ۲۵۳',
+    exampleStr: '۲۳ ضربدر ۱۱ ➔ ۲ (۲+۳) ۳ ➔ ۲۵۳',
     explanation: 'برای ضرب اعداد دو رقمی در ۱۱، رقم دهگان را سمت چپ، رقم یکان را سمت راست و مجموع دو رقم را وسط بنویس!',
     steps: [
       'عدد ۲۳ ➔ رقم‌های ۲ و ۳ را جدا کن.',
@@ -264,7 +264,7 @@ export const TRICK_LIST: TrickDef[] = [
       'عدد ۵ را بین ۲ و ۳ قرار بده ➔ ۲۵۳!'
     ],
     testQuestion: {
-      prompt: 'با ترفند ضرب در ۱۱، حاصل ۳۴ × ۱۱ چند می‌شود؟ (۳ [۳+۴] ۴)',
+      prompt: 'با ترفند ضرب در ۱۱، حاصل ۳۴ ضربدر ۱۱ چند می‌شود؟ (۳ [۳+۴] ۴)',
       f1: 34,
       f2: 11,
       correctAnswer: 374,
@@ -279,20 +279,20 @@ export const TRICK_LIST: TrickDef[] = [
     categoryLabel: 'اعداد زوج و ۵',
     icon: '⚖️',
     shortDesc: 'یک عدد را نصف کن و عدد دیگر را دو برابر کن تا ضرب آسان شود!',
-    exampleStr: '۱۶ × ۵ ➔ ۸ × ۱۰ = ۸۰  |  ۱۲ × ۲۵ ➔ ۶ × ۵۰ = ۳۰۰',
+    exampleStr: '۱۶ ضربدر ۵ ➔ ۸ ضربدر ۱۰ = ۸۰  |  ۱۲ ضربدر ۲۵ ➔ ۶ ضربدر ۵۰ = ۳۰۰',
     explanation: 'اگر یکی از اعداد زوج باشد و دیگری به ۵ ختم شود، با نصف و دو برابر کردن جواب هیچ تغییری نمی‌کند!',
     steps: [
       'عدد زوج ۱۶ را نصف کن ➔ ۸',
       'عدد ۵ را دو برابر کن ➔ ۱۰',
-      'ضرب ساده جدید: ۸ × ۱۰ = ۸۰!'
+      'ضرب ساده جدید: ۸ ضربدر ۱۰ = ۸۰!'
     ],
     testQuestion: {
-      prompt: 'با ترفند نصف و دو برابر، حاصل ۱۴ × ۵ چقدر می‌شود؟ (نصف ۱۴ می‌شود ۷، دوبرابر ۵ می‌شود ۱۰)',
+      prompt: 'با ترفند نصف و دو برابر، حاصل ۱۴ ضربدر ۵ چقدر می‌شود؟ (نصف ۱۴ می‌شود ۷، دوبرابر ۵ می‌شود ۱۰)',
       f1: 14,
       f2: 5,
       correctAnswer: 70,
       options: [60, 70, 80, 75],
-      hint: '۷ × ۱۰ = ۷۰'
+      hint: '۷ ضربدر ۱۰ = ۷۰'
     }
   },
   {
@@ -302,14 +302,14 @@ export const TRICK_LIST: TrickDef[] = [
     categoryLabel: 'قانون طلایی',
     icon: '🔄',
     shortDesc: 'ترتیب اعداد در ضرب هیچ تفاوتی در حاصل ایجاد نمی‌کند!',
-    exampleStr: '۳ × ۷ = ۲۱  و  ۷ × ۳ = ۲۱',
+    exampleStr: '۳ ضربدر ۷ = ۲۱  و  ۷ ضربدر ۳ = ۲۱',
     explanation: 'اگر ضربی برایت سخت بود، جای اعداد را عوض کن! ضرب‌های معکوس همگی یک جواب دارند.',
     steps: [
-      'اگر ۷ × ۳ برایت سخت است، آن را به ۳ × ۷ تبدیل کن.',
+      'اگر ۷ ضربدر ۳ برایت سخت است، آن را به ۳ ضربدر ۷ تبدیل کن.',
       'پاسخ هر دو دقیقاً ۲۱ است!'
     ],
     testQuestion: {
-      prompt: 'اگر بدانیم ۴ × ۸ = ۳۲ است، حاصل ۸ × ۴ چقدر است؟',
+      prompt: 'اگر بدانیم ۴ ضربدر ۸ = ۳۲ است، حاصل ۸ ضربدر ۴ چقدر است؟',
       f1: 8,
       f2: 4,
       correctAnswer: 32,
@@ -757,11 +757,11 @@ export const TricksView: React.FC<TricksViewProps> = ({ onNavigateToPractice }) 
               </div>
               <div className="grid grid-cols-2 gap-2 text-xs font-black">
                 <div className="bg-white p-2.5 rounded-xl border border-amber-200">
-                  <div className="text-amber-900">دو برابر اول (× ۲)</div>
+                  <div className="text-amber-900">دو برابر اول (ضربدر ۲)</div>
                   <div className="text-base text-slate-800 mt-1">{toPersianDigits(doubleTwiceVal * 2)}</div>
                 </div>
                 <div className="bg-amber-500 text-slate-950 p-2.5 rounded-xl border border-amber-600">
-                  <div className="text-slate-950">دو برابر دوم (× ۴)</div>
+                  <div className="text-slate-950">دو برابر دوم (ضربدر ۴)</div>
                   <div className="text-base text-slate-950 font-black mt-1">{toPersianDigits(doubleTwiceVal * 4)}</div>
                 </div>
               </div>
@@ -785,15 +785,15 @@ export const TricksView: React.FC<TricksViewProps> = ({ onNavigateToPractice }) 
               </div>
               <div className="grid grid-cols-3 gap-1.5 text-xs font-black">
                 <div className="bg-white p-2 rounded-xl border border-purple-200">
-                  <div className="text-purple-800 text-[10px]">مرحله ۱ (×۲)</div>
+                  <div className="text-purple-800 text-[10px]">مرحله ۱ (ضربدر ۲)</div>
                   <div className="text-sm text-slate-800 mt-0.5">{toPersianDigits(doubleThriceVal * 2)}</div>
                 </div>
                 <div className="bg-purple-100 p-2 rounded-xl border border-purple-300">
-                  <div className="text-purple-900 text-[10px]">مرحله ۲ (×۴)</div>
+                  <div className="text-purple-900 text-[10px]">مرحله ۲ (ضربدر ۴)</div>
                   <div className="text-sm text-slate-900 mt-0.5">{toPersianDigits(doubleThriceVal * 4)}</div>
                 </div>
                 <div className="bg-purple-600 text-white p-2 rounded-xl border border-purple-700">
-                  <div className="text-purple-100 text-[10px]">مرحله ۳ (×۸)</div>
+                  <div className="text-purple-100 text-[10px]">مرحله ۳ (ضربدر ۸)</div>
                   <div className="text-sm font-black mt-0.5">{toPersianDigits(doubleThriceVal * 8)}</div>
                 </div>
               </div>
