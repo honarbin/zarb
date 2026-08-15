@@ -20,9 +20,12 @@ import {
 } from 'lucide-react';
 import { toPersianDigits, sounds, useAudioState } from '../utils/persian';
 import { MathFormula } from './MathFormula';
-
+import { MathExpression } from './MathExpression';
+import { GameCharacter } from './GameCharacter';
+import { UserStats } from '../types';
 
 interface ConceptViewProps {
+  stats: UserStats;
   onStartTablePractice: (tableNum: number) => void;
   onNavigateToPractice: () => void;
 }
@@ -39,6 +42,7 @@ const GAME_ITEMS = [
 ];
 
 export const ConceptView: React.FC<ConceptViewProps> = ({
+  stats,
   onStartTablePractice,
   onNavigateToPractice,
 }) => {
@@ -65,7 +69,7 @@ export const ConceptView: React.FC<ConceptViewProps> = ({
   const [groupGameStep, setGroupGameStep] = useState<'build' | 'sum' | 'mult' | 'done'>('build');
   const [userSumAnswer, setUserSumAnswer] = useState<string>('');
   const [userMultAnswer, setUserMultAnswer] = useState<string>('');
-  const [groupFeedback, setGroupFeedback] = useState<{ isCorrect: boolean; msg: string } | null>(null);
+  const [groupFeedback, setGroupFeedback] = useState<{ isCorrect: boolean; msg: React.ReactNode } | null>(null);
 
   // --- Sub-Tab 3 State: Add or Multiply Game ---
   const [quizIndex, setQuizIndex] = useState<number>(0);
@@ -184,14 +188,39 @@ export const ConceptView: React.FC<ConceptViewProps> = ({
       confetti({ particleCount: 80, spread: 70, origin: { y: 0.6 } });
       setGroupFeedback({
         isCorrect: true,
-        msg: `فوق‌العاده بود! ${toPersianDigits(currentChallenge.groups)} ضربدر ${toPersianDigits(currentChallenge.itemsPerGroup)} = ${toPersianDigits(targetTotal)}`,
+        msg: (
+          <div className="flex flex-col items-center justify-center gap-2">
+            <span className="text-sm font-black text-emerald-950">فوق‌العاده بود! 🎉</span>
+            <div className="flex flex-row items-center justify-center gap-2 bg-white px-3 py-1 rounded-xl border border-emerald-300 font-black text-emerald-900" dir="ltr" style={{ direction: 'ltr' }}>
+              <span>{toPersianDigits(currentChallenge.groups)}</span>
+              <span className="text-emerald-500 mx-1 font-black text-lg">×</span>
+              <span>{toPersianDigits(currentChallenge.itemsPerGroup)}</span>
+              <span className="text-slate-400 mx-1">=</span>
+              <span className="text-emerald-600">{toPersianDigits(targetTotal)}</span>
+            </div>
+          </div>
+        ),
       });
       setGroupGameStep('done');
     } else {
       sounds.playWrongSound();
       setGroupFeedback({
         isCorrect: false,
-        msg: `دوباره بررسی کن! حاصل ضرب ${toPersianDigits(currentChallenge.groups)} ضربدر ${toPersianDigits(currentChallenge.itemsPerGroup)} می‌شود ${toPersianDigits(targetTotal)}.`,
+        msg: (
+          <div className="flex flex-col items-center justify-center gap-2">
+            <span className="text-sm font-black text-rose-950">دوباره بررسی کن! 🔍</span>
+            <div className="flex flex-row items-center justify-center flex-wrap gap-2 bg-white px-3 py-1.5 rounded-xl border border-rose-300 font-black text-rose-900" dir="ltr" style={{ direction: 'ltr' }}>
+              <span>حاصل</span>
+              <span className="bg-rose-50 px-1.5 py-0.5 rounded-lg border border-rose-200 flex flex-row items-center gap-1 mx-1" dir="ltr" style={{ direction: 'ltr' }}>
+                <span>{toPersianDigits(currentChallenge.groups)}</span>
+                <span className="text-rose-500 mx-1 font-black text-lg">×</span>
+                <span>{toPersianDigits(currentChallenge.itemsPerGroup)}</span>
+              </span>
+              <span>می‌شود</span>
+              <span className="bg-emerald-50 text-emerald-800 px-1.5 py-0.5 rounded-lg border border-emerald-200 mx-1">{toPersianDigits(targetTotal)}</span>
+            </div>
+          </div>
+        ),
       });
     }
   };
@@ -233,6 +262,28 @@ export const ConceptView: React.FC<ConceptViewProps> = ({
   return (
     <div className="max-w-xl mx-auto px-4 py-6 pb-28 space-y-6">
       
+      {/* 🚀 Welcome Hero Sticker Banner (Rule 9) */}
+      <div className="bg-white rounded-3xl p-4 border-2 border-amber-200 shadow-sm flex items-center gap-4">
+        <div className="w-16 h-16 shrink-0 flex items-center justify-center bg-amber-50 rounded-2xl p-1 border border-amber-100">
+          <GameCharacter
+            characterId={(stats.avatar as any) || 'fox'}
+            expression="idle"
+            size="sm"
+            hat={stats.selectedHat}
+            glasses={stats.selectedGlasses}
+            accessory={stats.selectedAccessory}
+          />
+        </div>
+        <div className="space-y-0.5">
+          <h2 className="text-sm font-black text-slate-800 typo-body">
+            سلام {stats.username} قهرمان! 👋
+          </h2>
+          <p className="text-[11px] text-slate-500 font-bold leading-relaxed typo-body-small">
+            امروز آماده‌ای یک مرحله دیگه جلو بری و جدول ضرب رو مثل آب خوردن یاد بگیری؟ 🚀
+          </p>
+        </div>
+      </div>
+
       {/* Top Banner Header */}
       <div className="bg-gradient-to-r from-amber-500 via-orange-500 to-amber-600 text-slate-900 rounded-3xl p-5 shadow-lg border-4 border-amber-300 relative overflow-hidden space-y-2">
         <div className="flex items-center justify-between">
@@ -344,7 +395,7 @@ export const ConceptView: React.FC<ConceptViewProps> = ({
             </div>
 
             <p className="text-xs text-slate-700 leading-relaxed font-bold">
-              وقتی با عبارت <strong className="text-amber-700 text-sm">۳ ضربدر ۴</strong> مواجه می‌شویم، یعنی:
+              وقتی با عبارت <strong className="text-amber-700 text-sm">۳ × ۴</strong> مواجه می‌شویم، یعنی:
               <br />
               «۳ گروه داریم و در هر گروه ۴ تاست.»
             </p>
@@ -375,16 +426,36 @@ export const ConceptView: React.FC<ConceptViewProps> = ({
             </div>
 
             {/* Addition to Multiplication Transformation */}
-            <div className="bg-gradient-to-r from-amber-500 to-orange-500 p-4 rounded-2xl text-slate-950 font-black text-center space-y-2 shadow-sm">
-              <div className="text-xs text-slate-900">ارتباط بین جمع تکراری و ضرب:</div>
-              <div className="text-xl font-black bg-white/90 text-amber-950 py-1.5 px-4 rounded-xl border border-amber-300 inline-block">
-                ۴ + ۴ + ۴ = {toPersianDigits(12)}
-              </div>
-              <div className="text-lg">↓</div>
-              <div className="text-2xl font-black bg-slate-950 text-amber-300 py-2 px-6 rounded-2xl shadow-md inline-block">
-                <MathFormula factor1={3} factor2={4} answer={12} className="text-amber-300" />
+            <div className="bg-gradient-to-r from-amber-500 to-orange-500 p-5 rounded-3xl text-slate-950 font-black text-center space-y-4 shadow-sm">
+              <div className="text-sm text-slate-900 typo-h3">ضرب یعنی جمع تکراری!</div>
+              <div className="text-xs text-slate-800 typo-body bg-amber-100/60 inline-block px-3 py-1 rounded-full">۳ گروه ۴تایی داریم.</div>
+              
+              <div className="flex flex-col items-center gap-3 bg-white/95 p-4 rounded-2xl shadow-inner">
+                <div className="text-xs text-slate-500 typo-caption">جمع تکراری</div>
+                <MathExpression expression="4 + 4 + 4 = 12" size="large" color="text-amber-950" symbolColor="text-amber-500" />
+                
+                <div className="text-xl text-amber-600 font-bold">↓</div>
+                
+                <div className="text-xs text-slate-500 typo-caption">عبارت ضرب</div>
+                <MathExpression expression="3 × 4 = 12" size="large" color="text-slate-950" symbolColor="text-amber-600" />
               </div>
 
+              {/* Character speech bubble (Rule 8) */}
+              <div className="bg-amber-50/90 p-3 rounded-2xl border border-amber-200/80 flex items-center gap-3">
+                <div className="w-12 h-12 flex items-center justify-center bg-white rounded-xl p-1 shrink-0">
+                  <GameCharacter
+                    characterId={(stats.avatar as any) || 'fox'}
+                    expression="cheering"
+                    size="sm"
+                    hat={stats.selectedHat}
+                    glasses={stats.selectedGlasses}
+                    accessory={stats.selectedAccessory}
+                  />
+                </div>
+                <div className="text-[11px] text-slate-800 font-extrabold text-right leading-relaxed">
+                  «دیدی؟ ضرب کمک میکنه جمع‌های تکراری رو خیلی سریع‌تر و راحت‌تر بنویسیم!» 🚀✨
+                </div>
+              </div>
             </div>
           </div>
 
@@ -440,15 +511,16 @@ export const ConceptView: React.FC<ConceptViewProps> = ({
               ))}
             </div>
 
-            <div className="flex flex-col items-center gap-2 bg-slate-900 text-white p-4 rounded-2xl text-center">
-              <div className="text-sm font-bold text-sky-300">
-                جمع تکراری: ۳ + ۳ + ۳ + ۳ = {toPersianDigits(12)}
+            <div className="flex flex-col items-center gap-4 bg-slate-900 text-white p-5 rounded-2xl text-center shadow-lg">
+              <div className="flex flex-col items-center gap-1">
+                <span className="text-xs text-sky-400 font-semibold typo-caption">جمع تکراری</span>
+                <MathExpression expression="3 + 3 + 3 + 3 = 12" size="large" color="text-sky-200" symbolColor="text-sky-400" />
               </div>
-              <div className="text-xl font-black text-amber-400 flex items-center gap-2">
-                <span>عبارت ضرب:</span>
-                <MathFormula factor1={4} factor2={3} answer={12} className="text-amber-400" />
+              <div className="w-full border-t border-slate-800 my-1"></div>
+              <div className="flex flex-col items-center gap-1">
+                <span className="text-xs text-amber-400 font-semibold typo-caption">عبارت ضرب</span>
+                <MathExpression expression="4 × 3 = 12" size="large" color="text-amber-300" symbolColor="text-amber-400" />
               </div>
-
             </div>
           </div>
 
@@ -514,8 +586,10 @@ export const ConceptView: React.FC<ConceptViewProps> = ({
                         </div>
                       ))}
                     </div>
-                    <div className="text-sm font-black text-purple-900 dir-ltr">
-                      ۴ + ۴ + ۴ = {toPersianDigits(12)} ← ۳ × ۴ = {toPersianDigits(12)}
+                    <div className="flex flex-col sm:flex-row items-center justify-center gap-3 p-2 bg-white rounded-2xl border border-purple-200 shadow-xs">
+                      <MathExpression expression="4 + 4 + 4 = 12" size="normal" color="text-purple-950" symbolColor="text-purple-400" />
+                      <span className="text-purple-500 font-bold">→</span>
+                      <MathExpression expression="3 × 4 = 12" size="normal" color="text-purple-900" symbolColor="text-purple-600" />
                     </div>
                   </div>
                 ) : (
@@ -530,8 +604,10 @@ export const ConceptView: React.FC<ConceptViewProps> = ({
                         </div>
                       ))}
                     </div>
-                    <div className="text-sm font-black text-purple-900 dir-ltr">
-                      ۳ + ۳ + ۳ + ۳ = {toPersianDigits(12)} ← ۴ × ۳ = {toPersianDigits(12)}
+                    <div className="flex flex-col sm:flex-row items-center justify-center gap-3 p-2 bg-white rounded-2xl border border-purple-200 shadow-xs">
+                      <MathExpression expression="3 + 3 + 3 + 3 = 12" size="normal" color="text-purple-950" symbolColor="text-purple-400" />
+                      <span className="text-purple-500 font-bold">→</span>
+                      <MathExpression expression="4 × 3 = 12" size="normal" color="text-purple-900" symbolColor="text-purple-600" />
                     </div>
                   </div>
                 )}
@@ -937,7 +1013,7 @@ export const ConceptView: React.FC<ConceptViewProps> = ({
               <div className="bg-white/80 p-3 rounded-xl border border-slate-200 text-slate-800 space-y-1">
                 <div className="font-black text-slate-900">توضیح مفهومی:</div>
                 <p>
-                  هرچند حاصل ضرب هر دو گزینه برابر با {toPersianDigits(currentQuiz.total)} است، اما چیدمان تصویری {toPersianDigits(currentQuiz.numGroups)} گروه {toPersianDigits(currentQuiz.groupSize)}‌تایی مشخصاً برابر با عبارت <strong className="text-sky-700 font-black">{toPersianDigits(currentQuiz.numGroups)} ضربدر {toPersianDigits(currentQuiz.groupSize)}</strong> می‌باشد.
+                  هرچند حاصل ضرب هر دو گزینه برابر با {toPersianDigits(currentQuiz.total)} است، اما چیدمان تصویری {toPersianDigits(currentQuiz.numGroups)} گروه {toPersianDigits(currentQuiz.groupSize)}‌تایی مشخصاً برابر با عبارت <strong className="text-sky-700 font-black">{toPersianDigits(currentQuiz.numGroups)} × {toPersianDigits(currentQuiz.groupSize)}</strong> می‌باشد.
                 </p>
               </div>
 

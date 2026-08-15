@@ -12,7 +12,7 @@ export interface MultiplicationStats {
 
 export interface UserStats {
   username: string;
-  avatar: string;
+  avatar: string; // This will hold the characterId ('robot' | 'fox' | 'panda' | 'cat' or fallback to default)
   totalScore: number;
   highScore: number;
   maxStreak: number;
@@ -23,6 +23,9 @@ export interface UserStats {
   soundEnabled: boolean;
   tableStats: Record<string, MultiplicationStats>; // key e.g. "7x8"
   unlockedBadges: string[];
+  selectedHat?: string;
+  selectedGlasses?: string;
+  selectedAccessory?: string;
 }
 
 export interface Question {

@@ -86,7 +86,7 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen bg-amber-50/60 text-slate-800 font-['Vazirmatn',sans-serif] selection:bg-amber-200 flex flex-col dir-rtl">
+    <div className="min-h-screen bg-amber-50/60 text-slate-800 font-['Estedad',sans-serif] selection:bg-amber-200 flex flex-col dir-rtl">
       
       {/* Header */}
       <Header
@@ -105,6 +105,7 @@ export default function App() {
         {currentView === 'concept' && (
           <ConceptView
             key={`concept-${viewKeys.concept}`}
+            stats={userStats}
             onStartTablePractice={handleStartTablePractice}
             onNavigateToPractice={() => handleNavigate('practice')}
           />

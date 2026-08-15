@@ -6,6 +6,7 @@ import { UserStats, DifficultyLevel, Question, PracticeSummary } from '../types'
 import { toPersianDigits, formatTimePersian, sounds } from '../utils/persian';
 import { generateQuestion, recordQuestionResult, saveUserStats, checkBadges, getWeaknessList } from '../utils/storage';
 import { MathFormula } from './MathFormula';
+import { GameCharacter } from './GameCharacter';
 
 
 interface PracticeViewProps {
@@ -336,7 +337,16 @@ export const PracticeView: React.FC<PracticeViewProps> = ({ stats, onUpdateStats
         >
           {/* Header & Stars */}
           <div className="space-y-3">
-            <div className="text-5xl animate-bounce">🎉</div>
+            <div className="flex justify-center pb-2">
+              <GameCharacter
+                characterId={(stats.avatar as any) || 'fox'}
+                expression="celebration"
+                size="lg"
+                hat={stats.selectedHat}
+                glasses={stats.selectedGlasses}
+                accessory={stats.selectedAccessory}
+              />
+            </div>
             <h2 className="text-2xl font-black text-slate-900">{summary.message}</h2>
             
             {/* Star Rating */}
@@ -456,6 +466,26 @@ export const PracticeView: React.FC<PracticeViewProps> = ({ stats, onUpdateStats
         animate={{ opacity: 1, y: 0 }}
         className="bg-white rounded-3xl p-8 text-center shadow-xl border-4 border-amber-300 space-y-6 relative overflow-hidden"
       >
+        {/* Dynamic Interactive Character Companion (Rule 2) */}
+        <div className="flex justify-center -mt-2 pb-1">
+          <GameCharacter
+            characterId={(stats.avatar as any) || 'fox'}
+            expression={
+              isAnswered
+                ? feedback?.isCorrect
+                  ? 'correct'
+                  : 'wrong'
+                : selectedOption !== null
+                ? 'thinking'
+                : 'idle'
+            }
+            size="md"
+            hat={stats.selectedHat}
+            glasses={stats.selectedGlasses}
+            accessory={stats.selectedAccessory}
+          />
+        </div>
+
         <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">
           پاسخ صحیح را انتخاب کن
         </p>
@@ -466,8 +496,9 @@ export const PracticeView: React.FC<PracticeViewProps> = ({ stats, onUpdateStats
             factor1={currentQuestion?.factor1 ?? 1}
             factor2={currentQuestion?.factor2 ?? 1}
             answer="؟"
-            className="text-4xl sm:text-5xl text-slate-900 tracking-wider"
+            className="text-slate-900 tracking-wider"
             symbolColor="text-amber-500"
+            size="display"
           />
         </div>
 
@@ -495,7 +526,7 @@ export const PracticeView: React.FC<PracticeViewProps> = ({ stats, onUpdateStats
                 key={idx}
                 disabled={isAnswered}
                 onClick={() => handleSelectOption(option)}
-                className={`py-4 px-4 rounded-2xl text-2xl font-black border-b-4 transition-all duration-200 cursor-pointer active:scale-95 flex items-center justify-center gap-2 ${btnStyle}`}
+                className={`py-4 px-4 rounded-2xl typo-math-large border-b-4 transition-all duration-200 cursor-pointer active:scale-95 flex items-center justify-center gap-2 ${btnStyle}`}
               >
                 <span>{toPersianDigits(option)}</span>
                 {isAnswered && isCorrect && <CheckCircle2 className="w-5 h-5 text-white" />}

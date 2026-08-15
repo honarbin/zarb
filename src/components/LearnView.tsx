@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { BookOpen, Volume2, Pause, ArrowRight, Grid, Sparkles, Play, CheckCircle } from 'lucide-react';
 import { toPersianDigits, sounds, useAudioState } from '../utils/persian';
 import { MathFormula } from './MathFormula';
+import { MathExpression } from './MathExpression';
 
 interface LearnViewProps {
   onStartTablePractice: (tableNum: number) => void;
@@ -180,21 +181,19 @@ export const LearnView: React.FC<LearnViewProps> = ({ onStartTablePractice, onNa
         </div>
 
         {showPreLesson && (
-          <div className="bg-white/90 p-3 rounded-xl border border-amber-200 text-xs font-bold text-slate-800 space-y-1.5">
-            <p className="text-[11px] text-slate-600 font-medium">
+          <div className="bg-white/90 p-4 rounded-xl border border-amber-200 text-sm font-bold text-slate-800 space-y-2">
+            <p className="text-xs text-slate-600 font-medium typo-body-small">
               قبل از حفظ کردن، ببین چطور اعداد با جمع تکراری بزرگتر می‌شوند:
             </p>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5 pt-1">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-1">
               {Array.from({ length: 4 }, (_, i) => i + 1).map((multiplier) => {
-                const repeatedSum = Array.from({ length: multiplier })
-                  .map(() => toPersianDigits(selectedTable))
-                  .join(' + ');
+                const repeatedSumExpr = Array.from({ length: multiplier })
+                  .map(() => selectedTable)
+                  .join(' + ') + ` = ${selectedTable * multiplier}`;
                 return (
-                  <div key={multiplier} className="bg-amber-100/60 p-2 rounded-lg border border-amber-200 flex items-center justify-between gap-2">
-                    <MathFormula factor1={selectedTable} factor2={multiplier} className="text-amber-900 font-black text-xs" />
-                    <span className="text-slate-700 text-[11px] math-flex dir-ltr" style={{ direction: 'ltr', unicodeBidi: 'isolate' }}>
-                      {repeatedSum} = <strong className="text-amber-900">{toPersianDigits(selectedTable * multiplier)}</strong>
-                    </span>
+                  <div key={multiplier} className="bg-amber-100/60 p-3 rounded-xl border border-amber-200 flex items-center justify-between gap-2 flex-wrap">
+                    <MathFormula factor1={selectedTable} factor2={multiplier} size="small" className="text-amber-900" />
+                    <MathExpression expression={repeatedSumExpr} size="small" color="text-slate-700" symbolColor="text-slate-400" />
                   </div>
                 );
               })}
@@ -270,18 +269,19 @@ export const LearnView: React.FC<LearnViewProps> = ({ onStartTablePractice, onNa
                     className="px-4 pb-5 pt-1 bg-amber-50/40 border-t border-amber-100 space-y-4"
                   >
                     {/* Full Formula & Result Display */}
-                    <div className="bg-white p-4 rounded-2xl border-2 border-amber-200/80 shadow-xs text-center space-y-1">
-                      <div className="text-xs font-bold text-amber-800">عبارت ریاضی:</div>
+                    <div className="bg-white p-5 rounded-2xl border-2 border-amber-200 shadow-xs text-center space-y-2">
+                      <div className="text-xs font-bold text-amber-800 typo-caption">عبارت ریاضی:</div>
                       <div className="flex justify-center items-center py-1">
                         <MathFormula
                           factor1={selectedTable}
                           factor2={f2}
                           answer={result}
-                          className="text-3xl sm:text-4xl text-slate-900 tracking-wide font-black"
+                          className="text-slate-900 tracking-wide"
                           symbolColor="text-amber-500"
+                          size="large"
                         />
                       </div>
-                      <div className="text-xs font-extrabold text-slate-700 bg-amber-100/70 py-1.5 px-3 rounded-xl inline-block border border-amber-200">
+                      <div className="text-sm font-extrabold text-slate-700 bg-amber-100/70 py-1.5 px-3 rounded-xl inline-block border border-amber-200 typo-body-small">
                         {toPersianDigits(selectedTable)} دسته‌ی {toPersianDigits(f2)}‌تایی = {toPersianDigits(result)}
                       </div>
                     </div>

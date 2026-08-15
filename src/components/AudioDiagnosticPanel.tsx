@@ -133,28 +133,48 @@ export const AudioDiagnosticPanel: React.FC = () => {
   };
 
   return (
-    <div className="bg-slate-900 text-slate-100 rounded-3xl p-5 my-4 border-4 border-amber-400 shadow-2xl space-y-4 text-right dir-rtl">
+    <div className={`transition-all duration-300 rounded-3xl p-5 my-4 ${
+      isOpen 
+        ? 'bg-slate-900 text-slate-100 border-4 border-amber-400 shadow-2xl space-y-4' 
+        : 'bg-amber-100/30 border border-amber-200/80 text-slate-700 shadow-xs'
+    } text-right dir-rtl max-w-xl mx-auto`}>
       {/* Header Banner */}
-      <div className="flex items-center justify-between border-b border-slate-700 pb-3">
+      <div className={`flex items-center justify-between ${isOpen ? 'border-b border-slate-700 pb-3' : ''}`}>
         <div className="flex items-center gap-2">
-          <div className="p-2 bg-amber-500/20 text-amber-400 rounded-2xl border border-amber-500/40">
-            <Volume2 className="w-6 h-6 animate-pulse" />
+          <div className={`p-1.5 rounded-xl border ${
+            isOpen 
+              ? 'bg-amber-500/20 text-amber-400 border-amber-500/40' 
+              : 'bg-amber-100 text-amber-800 border-amber-200'
+          }`}>
+            <Volume2 className="w-4 h-4" />
           </div>
           <div>
-            <h2 className="text-lg font-black text-amber-400">
-              پانل تشخیص و عیب‌یابی صدا (Audio Diagnostic)
+            <h2 className={`text-xs font-black ${isOpen ? 'text-lg text-amber-400' : 'text-slate-800'}`}>
+              عیب‌یاب و تست پخش صدا
             </h2>
-            <p className="text-[11px] text-slate-300 font-bold">
-              تست قطعی پخش صدای فارسی «سه سه تا، نه تا» و بررسی مشخصات سیستم
-            </p>
+            {!isOpen && (
+              <p className="text-[10px] text-slate-500 font-semibold">
+                اگر صدای برنامه را نمی‌شنوید، اینجا کلیک کنید
+              </p>
+            )}
+            {isOpen && (
+              <p className="text-[11px] text-slate-300 font-bold">
+                تست قطعی پخش صدای فارسی «سه سه تا، نه تا» و بررسی مشخصات سیستم
+              </p>
+            )}
           </div>
         </div>
 
         <button
+          type="button"
           onClick={() => setIsOpen(!isOpen)}
-          className="px-3 py-1 bg-slate-800 hover:bg-slate-700 text-xs text-slate-300 font-bold rounded-xl border border-slate-600 transition-colors cursor-pointer"
+          className={`px-2.5 py-1 text-[11px] font-black rounded-lg transition-colors cursor-pointer border ${
+            isOpen 
+              ? 'bg-slate-800 hover:bg-slate-700 text-slate-300 border-slate-600' 
+              : 'bg-amber-100 hover:bg-amber-200 text-amber-900 border-amber-300/60'
+          }`}
         >
-          {isOpen ? 'بستن پانل ▲' : 'باز کردن پانل ▼'}
+          {isOpen ? 'بستن عیب‌یاب ▲' : 'شروع عیب‌یابی ▼'}
         </button>
       </div>
 

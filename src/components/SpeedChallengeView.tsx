@@ -6,6 +6,7 @@ import { UserStats, Question } from '../types';
 import { toPersianDigits, formatTimePersian, sounds } from '../utils/persian';
 import { generateQuestion, recordQuestionResult, saveUserStats, checkBadges } from '../utils/storage';
 import { MathFormula } from './MathFormula';
+import { GameCharacter } from './GameCharacter';
 
 
 interface SpeedChallengeProps {
@@ -207,7 +208,16 @@ export const SpeedChallengeView: React.FC<SpeedChallengeProps> = ({ stats, onUpd
           className="bg-white rounded-3xl p-6 text-center shadow-xl border-4 border-purple-300 space-y-6"
         >
           <div className="space-y-2">
-            <div className="text-5xl animate-bounce">⚡</div>
+            <div className="flex justify-center pb-2">
+              <GameCharacter
+                characterId={(stats.avatar as any) || 'fox'}
+                expression="celebration"
+                size="lg"
+                hat={stats.selectedHat}
+                glasses={stats.selectedGlasses}
+                accessory={stats.selectedAccessory}
+              />
+            </div>
             <h2 className="text-2xl font-black text-slate-900">پایان مسابقه سرعتی!</h2>
             <p className="text-xs text-slate-500 font-bold">عملکرد فوق‌العاده‌ای در ۶۰ ثانیه داشتی!</p>
           </div>
@@ -307,6 +317,26 @@ export const SpeedChallengeView: React.FC<SpeedChallengeProps> = ({ stats, onUpd
       {/* Question Card */}
       <div className="bg-white rounded-3xl p-6 text-center shadow-xl border-4 border-purple-300 space-y-5">
         
+        {/* Dynamic Interactive Character Companion (Rule 2) */}
+        <div className="flex justify-center -mt-1 pb-1">
+          <GameCharacter
+            characterId={(stats.avatar as any) || 'fox'}
+            expression={
+              feedback
+                ? feedback.isCorrect
+                  ? 'correct'
+                  : 'wrong'
+                : combo > 3
+                ? 'cheering'
+                : 'idle'
+            }
+            size="md"
+            hat={stats.selectedHat}
+            glasses={stats.selectedGlasses}
+            accessory={stats.selectedAccessory}
+          />
+        </div>
+
         {/* Score Display */}
         <div className="flex justify-between items-center text-xs font-bold text-slate-400">
           <span>مسابقه سرعتی</span>
@@ -321,8 +351,9 @@ export const SpeedChallengeView: React.FC<SpeedChallengeProps> = ({ stats, onUpd
             factor1={currentQuestion?.factor1 ?? 1}
             factor2={currentQuestion?.factor2 ?? 1}
             answer="؟"
-            className="text-4xl sm:text-5xl text-slate-900 tracking-wider"
+            className="text-slate-900 tracking-wider"
             symbolColor="text-purple-500"
+            size="display"
           />
         </div>
 
@@ -333,7 +364,7 @@ export const SpeedChallengeView: React.FC<SpeedChallengeProps> = ({ stats, onUpd
             <button
               key={idx}
               onClick={() => handleAnswer(option)}
-              className="py-4 px-4 rounded-2xl text-2xl font-black bg-purple-50 hover:bg-purple-200 text-purple-900 border-2 border-purple-200 shadow transition-transform active:scale-90 cursor-pointer"
+              className="py-4 px-4 rounded-2xl typo-math-large bg-purple-50 hover:bg-purple-200 text-purple-900 border-2 border-purple-200 shadow transition-transform active:scale-90 cursor-pointer"
             >
               {toPersianDigits(option)}
             </button>

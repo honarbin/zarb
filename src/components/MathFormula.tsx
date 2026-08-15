@@ -7,6 +7,7 @@ interface MathFormulaProps {
   answer?: number | string | null;
   className?: string;
   symbolColor?: string;
+  size?: 'small' | 'normal' | 'large' | 'display';
 }
 
 /**
@@ -20,6 +21,7 @@ export const MathFormula: React.FC<MathFormulaProps> = ({
   answer,
   className = '',
   symbolColor = '',
+  size = 'normal',
 }) => {
   const f1Text = typeof factor1 === 'number' ? toPersianDigits(factor1) : factor1;
   const f2Text = typeof factor2 === 'number' ? toPersianDigits(factor2) : factor2;
@@ -30,18 +32,23 @@ export const MathFormula: React.FC<MathFormulaProps> = ({
         : answer
       : null;
 
+  let sizeClass = 'typo-math';
+  if (size === 'small') sizeClass = 'typo-caption';
+  if (size === 'large') sizeClass = 'typo-math-large';
+  if (size === 'display') sizeClass = 'typo-display';
+
   return (
     <span
       dir="ltr"
-      className={`math-flex inline-flex items-center gap-1.5 font-black dir-ltr ${className}`}
+      className={`math-expression math-flex inline-flex items-center gap-2.5 font-black dir-ltr ${sizeClass} ${className}`}
       style={{ direction: 'ltr', unicodeBidi: 'isolate' }}
     >
       <span>{f1Text}</span>
-      <span className={symbolColor || 'text-amber-500'}>×</span>
+      <span className={`${symbolColor || 'text-amber-500'} mx-0.5`}>×</span>
       <span>{f2Text}</span>
       {ansText !== null && (
         <>
-          <span className="text-slate-400 opacity-80">=</span>
+          <span className="text-slate-400 opacity-80 mx-0.5">=</span>
           <span>{ansText}</span>
         </>
       )}

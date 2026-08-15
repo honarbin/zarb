@@ -22,6 +22,7 @@ import {
 } from 'lucide-react';
 import { toPersianDigits, sounds, useAudioState } from '../utils/persian';
 import { MathFormula } from './MathFormula';
+import { MathExpression } from './MathExpression';
 
 
 interface TricksViewProps {
@@ -56,14 +57,14 @@ export const TRICK_LIST: TrickDef[] = [
     categoryLabel: 'روش همیشگی',
     icon: '☝️',
     shortDesc: 'هر عددی که ضرب در ۱ شود، حاصل خودش می‌شود!',
-    exampleStr: '۷ ضربدر ۱ = ۷',
+    exampleStr: '۷ × ۱ = ۷',
     explanation: 'ضرب در ۱ یعنی فقط ۱ گروه از آن عدد داریم، پس هیچی تغییر نمی‌کند.',
     steps: [
       'عدد اولیه را نگاه کن (مثلاً ۷).',
       'چون ۱ گروه داریم، همان عدد ۷ را در پاسخ بنویس!'
     ],
     testQuestion: {
-      prompt: 'با ترفند ضرب در ۱، حاصل ضرب ۹ ضربدر ۱ چقدر می‌شود؟',
+      prompt: 'با ترفند ضرب در ۱، حاصل ضرب ۹ × ۱ چقدر می‌شود؟',
       f1: 9,
       f2: 1,
       correctAnswer: 9,
@@ -78,14 +79,14 @@ export const TRICK_LIST: TrickDef[] = [
     categoryLabel: 'روش همیشگی',
     icon: '✌️',
     shortDesc: 'ضرب در ۲ یعنی عدد را دو بار با خودش جمع کن (دو برابر کردن).',
-    exampleStr: '۷ ضربدر ۲ = ۷ + ۷ = ۱۴',
+    exampleStr: '۷ × ۲ = ۷ + ۷ = ۱۴',
     explanation: 'به‌جای جدول ضرب، فقط کافیست عدد را با خودش جمع کنی.',
     steps: [
       'عدد را دو بار کنار هم بنویس: ۷ + ۷',
       'حاصل جمع را حساب کن: ۱۴'
     ],
     testQuestion: {
-      prompt: 'با ترفند دو برابر کردن، حاصل ۶ ضربدر ۲ چند می‌شود؟',
+      prompt: 'با ترفند دو برابر کردن، حاصل ۶ × ۲ چند می‌شود؟',
       f1: 6,
       f2: 2,
       correctAnswer: 12,
@@ -100,14 +101,14 @@ export const TRICK_LIST: TrickDef[] = [
     categoryLabel: 'روش همیشگی',
     icon: '🖐️',
     shortDesc: 'حاصل ضرب هر عدد در ۵، همیشه به رقم ۰ یا ۵ ختم می‌شود!',
-    exampleStr: '۶ ضربدر ۵ = ۳۰  |  ۷ ضربدر ۵ = ۳۵',
+    exampleStr: '۶ × ۵ = ۳۰  |  ۷ × ۵ = ۳۵',
     explanation: 'اگر عدد زوج باشد حاصل به ۰ ختم می‌شود؛ اگر فرد باشد حاصل به ۵ ختم می‌شود.',
     steps: [
-      'عدد فرد ضربدر ۵ ➔ پایان با ۵ (مثلاً ۷ ضربدر ۵ = ۳۵)',
-      'عدد زوج ضربدر ۵ ➔ پایان با ۰ (مثلاً ۶ ضربدر ۵ = ۳۰)'
+      'عدد فرد × ۵ ➔ پایان با ۵ (مثلاً ۷ × ۵ = ۳۵)',
+      'عدد زوج × ۵ ➔ پایان با ۰ (مثلاً ۶ × ۵ = ۳۰)'
     ],
     testQuestion: {
-      prompt: 'با ترفند ضرب در ۵، حاصل ۸ ضربدر ۵ چند می‌شود؟ (چون ۸ زوج است، باید به ۰ ختم شود)',
+      prompt: 'با ترفند ضرب در ۵، حاصل ۸ × ۵ چند می‌شود؟ (چون ۸ زوج است، باید به ۰ ختم شود)',
       f1: 8,
       f2: 5,
       correctAnswer: 40,
@@ -122,14 +123,14 @@ export const TRICK_LIST: TrickDef[] = [
     categoryLabel: 'روش همیشگی',
     icon: '🚀',
     shortDesc: 'ضرب در ۱۰ خیلی ساده است! فقط یک صفر جلوی عدد بگذار.',
-    exampleStr: '۸ ضربدر ۱۰ = ۸۰',
+    exampleStr: '۸ × ۱۰ = ۸۰',
     explanation: 'هر عددی که در ۱۰ ضرب شود، یک مرتبه به چپ می‌رود و یک صفر در جلوی آن می‌نشیند.',
     steps: [
       'عدد اصلی را بنویس (مثلاً ۸).',
       'یک صفر ۰ به سمت راست آن بچسبان ➔ ۸۰'
     ],
     testQuestion: {
-      prompt: 'با ترفند اضافه کردن صفر، حاصل ۹ ضربدر ۱۰ چند می‌شود؟',
+      prompt: 'با ترفند اضافه کردن صفر، حاصل ۹ × ۱۰ چند می‌شود؟',
       f1: 9,
       f2: 10,
       correctAnswer: 90,
@@ -144,15 +145,15 @@ export const TRICK_LIST: TrickDef[] = [
     categoryLabel: 'اعداد ویژه (۹)',
     icon: '🖐️✨',
     shortDesc: 'با ۱۰ انگشت دستت، تمام ضرب‌های جدول ۹ را در ۳ ثانیه بگو!',
-    exampleStr: '۹ ضربدر ۴ = ۳۶ (انگشت ۴ام خم می‌شود: ۳ انگشت سمت راست، ۶ انگشت سمت چپ)',
-    explanation: 'دست‌هایت را باز کن. برای ضرب ۹ ضربدر N، انگشت Nام را بخوابان. انگشتان سمت چپ دهگان و سمت راست یکان هستند.',
+    exampleStr: '۹ × ۴ = ۳۶ (انگشت ۴ام خم می‌شود: ۳ انگشت سمت راست، ۶ انگشت سمت چپ)',
+    explanation: 'دست‌هایت را باز کن. برای ضرب ۹ × N، انگشت Nام را بخوابان. انگشتان سمت چپ دهگان و سمت راست یکان هستند.',
     steps: [
       '۱۰ انگشت دست را باز کن.',
       'انگشت شماره N را بخوابان.',
       'تعداد انگشتان سمت راست = دهگان | تعداد انگشتان سمت چپ = یکان!'
     ],
     testQuestion: {
-      prompt: 'با روش انگشتی، برای ۹ ضربدر ۵ کدام انگشت خوابیده و حاصل چند می‌شود؟',
+      prompt: 'با روش انگشتی، برای ۹ × ۵ کدام انگشت خوابیده و حاصل چند می‌شود؟',
       f1: 9,
       f2: 5,
       correctAnswer: 45,
@@ -167,19 +168,19 @@ export const TRICK_LIST: TrickDef[] = [
     categoryLabel: 'روش همیشگی',
     icon: '⚡',
     shortDesc: 'ضرب در ۴ یعنی ۲ بار عدد را دو برابر کن!',
-    exampleStr: '۶ ضربدر ۴ ➔ ۶ ضربدر ۲ = ۱۲ ➔ ۱۲ ضربدر ۲ = ۲۴',
+    exampleStr: '۶ × ۴ ➔ ۶ × ۲ = ۱۲ ➔ ۱۲ × ۲ = ۲۴',
     explanation: 'به‌جای حفظ جدول ۴، ابتدا عدد را با خودش جمع کن، سپس حاصل را دوباره با خودش جمع کن.',
     steps: [
       'مرحله ۱: ۶ را دو برابر کن ➔ ۱۲',
       'مرحله ۲: ۱۲ را دوباره دو برابر کن ➔ ۲۴'
     ],
     testQuestion: {
-      prompt: 'با دو بار دو برابر کردن، حاصل ۷ ضربدر ۴ چند می‌شود؟ (۷ ➔ ۱۴ ➔ ؟)',
+      prompt: 'با دو بار دو برابر کردن، حاصل ۷ × ۴ چند می‌شود؟ (۷ ➔ ۱۴ ➔ ؟)',
       f1: 7,
       f2: 4,
       correctAnswer: 28,
       options: [24, 28, 32, 14],
-      hint: '۷ ضربدر ۲ = ۱۴، حالا ۱۴ + ۱۴ = ۲۸'
+      hint: '۷ × ۲ = ۱۴، حالا ۱۴ + ۱۴ = ۲۸'
     }
   },
   {
@@ -189,20 +190,20 @@ export const TRICK_LIST: TrickDef[] = [
     categoryLabel: 'روش همیشگی',
     icon: '🔥',
     shortDesc: 'ضرب در ۸ یعنی ۳ بار پشت سر هم عدد را دو برابر کن!',
-    exampleStr: '۳ ضربدر ۸ ➔ ۳ ➔ ۶ ➔ ۱۲ ➔ ۲۴',
-    explanation: 'چون ۸ یعنی ۲ ضربدر ۲ ضربدر ۲، پس سه بار دو برابر کردن حاصل دقیق ضرب در ۸ را می‌دهد.',
+    exampleStr: '۳ × ۸ ➔ ۳ ➔ ۶ ➔ ۱۲ ➔ ۲۴',
+    explanation: 'چون ۸ یعنی ۲ × ۲ × ۲، پس سه بار دو برابر کردن حاصل دقیق ضرب در ۸ را می‌دهد.',
     steps: [
-      'مرحله ۱: ۳ ضربدر ۲ = ۶',
-      'مرحله ۲: ۶ ضربدر ۲ = ۱۲',
-      'مرحله ۳: ۱۲ ضربدر ۲ = ۲۴'
+      'مرحله ۱: ۳ × ۲ = ۶',
+      'مرحله ۲: ۶ × ۲ = ۱۲',
+      'مرحله ۳: ۱۲ × ۲ = ۲۴'
     ],
     testQuestion: {
-      prompt: 'با سه بار دو برابر کردن، حاصل ۵ ضربدر ۸ چند می‌شود؟ (۵ ➔ ۱۰ ➔ ۲۰ ➔ ؟)',
+      prompt: 'با سه بار دو برابر کردن، حاصل ۵ × ۸ چند می‌شود؟ (۵ ➔ ۱۰ ➔ ۲۰ ➔ ؟)',
       f1: 5,
       f2: 8,
       correctAnswer: 40,
       options: [35, 40, 48, 50],
-      hint: '۵ ضربدر ۲ = ۱۰ ➔ ۱۰ ضربدر ۲ = ۲۰ ➔ ۲۰ ضربدر ۲ = ۴۰'
+      hint: '۵ × ۲ = ۱۰ ➔ ۱۰ × ۲ = ۲۰ ➔ ۲۰ × ۲ = ۴۰'
     }
   },
   {
@@ -212,19 +213,19 @@ export const TRICK_LIST: TrickDef[] = [
     categoryLabel: 'روش همیشگی',
     icon: '🧩',
     shortDesc: 'ابتدا عدد را در ۵ ضرب کن، سپس ۱ بار خود عدد را به آن اضافه کن!',
-    exampleStr: '۷ ضربدر ۶ ➔ (۷ ضربدر ۵) + ۷ = ۳۵ + ۷ = ۴۲',
+    exampleStr: '۷ × ۶ ➔ (۷ × ۵) + ۷ = ۳۵ + ۷ = ۴۲',
     explanation: 'چون ضرب در ۵ خیلی آسان است، ابتدا ضرب در ۵ کن و سپس یک گروه اضافه کن.',
     steps: [
-      'مرحله ۱: ۷ ضربدر ۵ = ۳۵',
+      'مرحله ۱: ۷ × ۵ = ۳۵',
       'مرحله ۲: ۳۵ + ۷ = ۴۲'
     ],
     testQuestion: {
-      prompt: 'با ترفند (ضرب در ۵ + خود عدد)، حاصل ۸ ضربدر ۶ چند می‌شود؟',
+      prompt: 'با ترفند (ضرب در ۵ + خود عدد)، حاصل ۸ × ۶ چند می‌شود؟',
       f1: 8,
       f2: 6,
       correctAnswer: 48,
       options: [42, 48, 54, 40],
-      hint: '۸ ضربدر ۵ = ۴۰، حالا ۴۰ + ۸ = ۴۸'
+      hint: '۸ × ۵ = ۴۰، حالا ۴۰ + ۸ = ۴۸'
     }
   },
   {
@@ -234,19 +235,19 @@ export const TRICK_LIST: TrickDef[] = [
     categoryLabel: 'اعداد ویژه (۹)',
     icon: '🎯',
     shortDesc: 'عدد را در ۱۰ ضرب کن و سپس خود عدد را از آن کم کن!',
-    exampleStr: '۷ ضربدر ۹ ➔ (۷ ضربدر ۱۰) - ۷ = ۷۰ - ۷ = ۶۳',
+    exampleStr: '۷ × ۹ ➔ (۷ × ۱۰) - ۷ = ۷۰ - ۷ = ۶۳',
     explanation: 'چون ۹ فقط ۱ واحد از ۱۰ کمتر است، ضرب در ۱۰ کن و ۱ بار عدد را تفریق کن.',
     steps: [
-      'مرحله ۱: ۷ ضربدر ۱۰ = ۷۰',
+      'مرحله ۱: ۷ × ۱۰ = ۷۰',
       'مرحله ۲: ۷۰ - ۷ = ۶۳'
     ],
     testQuestion: {
-      prompt: 'با ترفند (ضرب در ۱۰ منهای خود عدد)، حاصل ۶ ضربدر ۹ چند می‌شود؟',
+      prompt: 'با ترفند (ضرب در ۱۰ منهای خود عدد)، حاصل ۶ × ۹ چند می‌شود؟',
       f1: 6,
       f2: 9,
       correctAnswer: 54,
       options: [54, 60, 48, 56],
-      hint: '۶ ضربدر ۱۰ = ۶۰، حالا ۶۰ - ۶ = ۵۴'
+      hint: '۶ × ۱۰ = ۶۰، حالا ۶۰ - ۶ = ۵۴'
     }
   },
   {
@@ -256,7 +257,7 @@ export const TRICK_LIST: TrickDef[] = [
     categoryLabel: 'اعداد دو رقمی',
     icon: '🔮',
     shortDesc: 'رقم‌های عدد را از هم باز کن و مجموعشان را وسط بگذار!',
-    exampleStr: '۲۳ ضربدر ۱۱ ➔ ۲ (۲+۳) ۳ ➔ ۲۵۳',
+    exampleStr: '۲۳ × ۱۱ ➔ ۲ (۲+۳) ۳ ➔ ۲۵۳',
     explanation: 'برای ضرب اعداد دو رقمی در ۱۱، رقم دهگان را سمت چپ، رقم یکان را سمت راست و مجموع دو رقم را وسط بنویس!',
     steps: [
       'عدد ۲۳ ➔ رقم‌های ۲ و ۳ را جدا کن.',
@@ -264,7 +265,7 @@ export const TRICK_LIST: TrickDef[] = [
       'عدد ۵ را بین ۲ و ۳ قرار بده ➔ ۲۵۳!'
     ],
     testQuestion: {
-      prompt: 'با ترفند ضرب در ۱۱، حاصل ۳۴ ضربدر ۱۱ چند می‌شود؟ (۳ [۳+۴] ۴)',
+      prompt: 'با ترفند ضرب در ۱۱، حاصل ۳۴ × ۱۱ چند می‌شود؟ (۳ [۳+۴] ۴)',
       f1: 34,
       f2: 11,
       correctAnswer: 374,
@@ -279,20 +280,20 @@ export const TRICK_LIST: TrickDef[] = [
     categoryLabel: 'اعداد زوج و ۵',
     icon: '⚖️',
     shortDesc: 'یک عدد را نصف کن و عدد دیگر را دو برابر کن تا ضرب آسان شود!',
-    exampleStr: '۱۶ ضربدر ۵ ➔ ۸ ضربدر ۱۰ = ۸۰  |  ۱۲ ضربدر ۲۵ ➔ ۶ ضربدر ۵۰ = ۳۰۰',
+    exampleStr: '۱۶ × ۵ ➔ ۸ × ۱۰ = ۸۰  |  ۱۲ × ۲۵ ➔ ۶ × ۵۰ = ۳۰۰',
     explanation: 'اگر یکی از اعداد زوج باشد و دیگری به ۵ ختم شود، با نصف و دو برابر کردن جواب هیچ تغییری نمی‌کند!',
     steps: [
       'عدد زوج ۱۶ را نصف کن ➔ ۸',
       'عدد ۵ را دو برابر کن ➔ ۱۰',
-      'ضرب ساده جدید: ۸ ضربدر ۱۰ = ۸۰!'
+      'ضرب ساده جدید: ۸ × ۱۰ = ۸۰!'
     ],
     testQuestion: {
-      prompt: 'با ترفند نصف و دو برابر، حاصل ۱۴ ضربدر ۵ چقدر می‌شود؟ (نصف ۱۴ می‌شود ۷، دوبرابر ۵ می‌شود ۱۰)',
+      prompt: 'با ترفند نصف و دو برابر، حاصل ۱۴ × ۵ چقدر می‌شود؟ (نصف ۱۴ می‌شود ۷، دوبرابر ۵ می‌شود ۱۰)',
       f1: 14,
       f2: 5,
       correctAnswer: 70,
       options: [60, 70, 80, 75],
-      hint: '۷ ضربدر ۱۰ = ۷۰'
+      hint: '۷ × ۱۰ = ۷۰'
     }
   },
   {
@@ -302,14 +303,14 @@ export const TRICK_LIST: TrickDef[] = [
     categoryLabel: 'قانون طلایی',
     icon: '🔄',
     shortDesc: 'ترتیب اعداد در ضرب هیچ تفاوتی در حاصل ایجاد نمی‌کند!',
-    exampleStr: '۳ ضربدر ۷ = ۲۱  و  ۷ ضربدر ۳ = ۲۱',
+    exampleStr: '۳ × ۷ = ۲۱  و  ۷ × ۳ = ۲۱',
     explanation: 'اگر ضربی برایت سخت بود، جای اعداد را عوض کن! ضرب‌های معکوس همگی یک جواب دارند.',
     steps: [
-      'اگر ۷ ضربدر ۳ برایت سخت است، آن را به ۳ ضربدر ۷ تبدیل کن.',
+      'اگر ۷ × ۳ برایت سخت است، آن را به ۳ × ۷ تبدیل کن.',
       'پاسخ هر دو دقیقاً ۲۱ است!'
     ],
     testQuestion: {
-      prompt: 'اگر بدانیم ۴ ضربدر ۸ = ۳۲ است، حاصل ۸ ضربدر ۴ چقدر است؟',
+      prompt: 'اگر بدانیم ۴ × ۸ = ۳۲ است، حاصل ۸ × ۴ چقدر است؟',
       f1: 8,
       f2: 4,
       correctAnswer: 32,
@@ -444,7 +445,7 @@ export const TricksView: React.FC<TricksViewProps> = ({ onNavigateToPractice }) 
         <p className="text-[11px] text-slate-700 font-bold leading-relaxed">
           ترتیب یادگیری صحیح:{' '}
           <span className="text-amber-900">
-            ۱. درک مفهوم گروه ➔ ۲. جمع تکراری ➔ ۳. مفهوم ضرب ➔ ۴. خاصیت جابه‌جایی ➔ ۵. جدول ضرب ➔ ۶. ترفندهای هوشمند ➔ ۷. تمرین سرعتی
+            ۱. درک مفهوم گروه ← ۲. جمع تکراری ← ۳. مفهوم ضرب ← ۴. خاصیت جابه‌جایی ← ۵. جدول ضرب ← ۶. ترفندهای هوشمند ← ۷. تمرین سرعتی
           </span>
         </p>
       </div>
@@ -473,14 +474,14 @@ export const TricksView: React.FC<TricksViewProps> = ({ onNavigateToPractice }) 
         )}
       </div>
 
-      {/* Trick Selection Tabs (Horizontal Scrollable Carousel) */}
+      {/* Trick Selection Tabs (Vertical Scrollable List) */}
       <div className="space-y-2">
         <div className="text-xs font-black text-slate-800 px-1 flex items-center justify-between">
           <span>لیست ترفندها:</span>
           <span className="text-[10px] text-slate-500 font-bold">برای انتخاب رویشان بزنید</span>
         </div>
 
-        <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-none">
+        <div className="flex flex-col gap-2 max-h-64 sm:max-h-72 overflow-y-auto overflow-x-hidden p-2 pr-1.5 pl-1.5 scroll-smooth rounded-2xl border-2 border-purple-100/80 bg-purple-50/20 shadow-inner">
           {TRICK_LIST.map((trick, index) => {
             const isUnlocked = unlockedIds.includes(trick.id);
             const isActive = trick.id === activeTrickId;
@@ -497,34 +498,45 @@ export const TricksView: React.FC<TricksViewProps> = ({ onNavigateToPractice }) 
                     sounds.playWrongSound();
                   }
                 }}
-                className={`p-3 rounded-2xl border-2 transition-all cursor-pointer text-right shrink-0 min-w-36 max-w-44 flex flex-col justify-between space-y-2 ${
+                className={`w-full p-3 rounded-xl border-2 transition-all cursor-pointer text-right flex items-center justify-between gap-3 ${
                   isActive
-                    ? 'bg-purple-600 text-white border-purple-700 shadow-md scale-102'
+                    ? 'bg-purple-600 text-white border-purple-700 shadow-md scale-101'
                     : isUnlocked
-                    ? 'bg-white hover:bg-purple-50 text-slate-800 border-purple-200 shadow-xs'
-                    : 'bg-slate-100 text-slate-400 border-slate-200 opacity-70 cursor-not-allowed'
+                    ? 'bg-white hover:bg-purple-50/80 text-slate-800 border-purple-200/80 shadow-xs'
+                    : 'bg-slate-100/80 text-slate-400 border-slate-200 opacity-70 cursor-not-allowed'
                 }`}
               >
-                <div className="flex items-center justify-between">
-                  <span className="text-xl">{trick.icon}</span>
+                <div className="flex items-center gap-3">
+                  <span className="text-2xl">{trick.icon}</span>
+                  <div>
+                    <div className="text-xs font-black">{trick.title}</div>
+                    <div className={`text-[10px] mt-0.5 font-bold ${
+                      isActive ? 'text-purple-100' : 'text-slate-500'
+                    }`}>
+                      <span>نمونه: </span>
+                      <span className="math-expression" dir="ltr">
+                        {toPersianDigits(trick.exampleStr)}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-2">
                   {isUnlocked ? (
-                    <span className={`text-[9px] font-black px-2 py-0.5 rounded-full ${
-                      isActive ? 'bg-purple-800 text-purple-100' : 'bg-purple-100 text-purple-900'
+                    <span className={`text-[9px] font-black px-2 py-1 rounded-full ${
+                      isActive ? 'bg-purple-800 text-purple-100' : 'bg-purple-100/90 text-purple-900'
                     }`}>
                       {trick.categoryLabel}
                     </span>
                   ) : (
-                    <Lock className="w-3.5 h-3.5 text-slate-400" />
+                    <div className="flex items-center gap-1 bg-slate-200/80 text-slate-500 px-2 py-1 rounded-full text-[9px] font-bold">
+                      <Lock className="w-3 h-3" />
+                      <span>قفل</span>
+                    </div>
                   )}
-                </div>
-
-                <div>
-                  <div className="text-xs font-black line-clamp-1">{trick.title}</div>
-                  <div className={`text-[10px] mt-0.5 line-clamp-1 font-bold ${
-                    isActive ? 'text-purple-100' : 'text-slate-500'
-                  }`}>
-                    {trick.exampleStr}
-                  </div>
+                  {isActive && (
+                    <div className="w-2 h-2 rounded-full bg-white animate-pulse" />
+                  )}
                 </div>
               </button>
             );
@@ -588,8 +600,10 @@ export const TricksView: React.FC<TricksViewProps> = ({ onNavigateToPractice }) 
             <p className="text-xs font-black text-purple-100">
               {activeTrick.shortDesc}
             </p>
-            <div className="text-2xl font-black bg-white/95 text-purple-950 py-2 px-5 rounded-xl border-2 border-purple-300 inline-block shadow-sm dir-ltr">
-              {toPersianDigits(activeTrick.exampleStr)}
+            <div className="bg-white/95 py-2 px-5 rounded-xl border-2 border-purple-300 inline-block shadow-sm">
+              <span className="math-expression text-2xl font-black text-purple-950 inline-block" dir="ltr">
+                {toPersianDigits(activeTrick.exampleStr)}
+              </span>
             </div>
           </div>
 
@@ -695,13 +709,10 @@ export const TricksView: React.FC<TricksViewProps> = ({ onNavigateToPractice }) 
                 </button>
               </div>
 
-              <div className="bg-white p-3 rounded-xl border border-sky-200 font-black text-slate-900 text-sm space-y-1">
-                <div className="flex justify-center items-center gap-1">
-                  <MathFormula factor1={doubleVal} factor2={2} />
-                  <span>= {toPersianDigits(doubleVal)} + {toPersianDigits(doubleVal)}</span>
-                </div>
-                <div className="text-emerald-600 text-base">
-                  حاصل دو برابر شدن = {toPersianDigits(doubleVal * 2)}
+              <div className="bg-white p-4 rounded-xl border border-sky-200 font-black text-slate-900 text-sm text-center space-y-2">
+                <div className="flex flex-col items-center justify-center gap-1">
+                  <span className="text-xs text-slate-400 typo-caption">عبارت ریاضی دو برابر شدن</span>
+                  <MathExpression expression={`${doubleVal} × 2 = ${doubleVal} + ${doubleVal} = ${doubleVal * 2}`} size="normal" color="text-slate-900" />
                 </div>
               </div>
 
@@ -723,7 +734,7 @@ export const TricksView: React.FC<TricksViewProps> = ({ onNavigateToPractice }) 
                   className="w-20 text-center py-1.5 px-2 rounded-xl border-2 border-emerald-400 font-black text-lg bg-white"
                 />
               </div>
-              <div className="bg-white p-3 rounded-xl border border-emerald-300 text-sm font-black text-slate-900 flex items-center justify-center gap-2">
+              <div className="bg-white p-3 rounded-xl border border-emerald-300 text-sm font-black text-slate-900 flex items-center justify-center gap-2 math-expression" dir="ltr">
                 <MathFormula factor1={zeroAppendVal} factor2={10} />
                 <span>=</span>
                 <span className="text-emerald-600 text-xl font-black">{toPersianDigits(zeroAppendVal)}</span>
@@ -757,11 +768,11 @@ export const TricksView: React.FC<TricksViewProps> = ({ onNavigateToPractice }) 
               </div>
               <div className="grid grid-cols-2 gap-2 text-xs font-black">
                 <div className="bg-white p-2.5 rounded-xl border border-amber-200">
-                  <div className="text-amber-900">دو برابر اول (ضربدر ۲)</div>
+                  <div className="text-amber-900">دو برابر اول (× ۲)</div>
                   <div className="text-base text-slate-800 mt-1">{toPersianDigits(doubleTwiceVal * 2)}</div>
                 </div>
                 <div className="bg-amber-500 text-slate-950 p-2.5 rounded-xl border border-amber-600">
-                  <div className="text-slate-950">دو برابر دوم (ضربدر ۴)</div>
+                  <div className="text-slate-950">دو برابر دوم (× ۴)</div>
                   <div className="text-base text-slate-950 font-black mt-1">{toPersianDigits(doubleTwiceVal * 4)}</div>
                 </div>
               </div>
@@ -785,15 +796,15 @@ export const TricksView: React.FC<TricksViewProps> = ({ onNavigateToPractice }) 
               </div>
               <div className="grid grid-cols-3 gap-1.5 text-xs font-black">
                 <div className="bg-white p-2 rounded-xl border border-purple-200">
-                  <div className="text-purple-800 text-[10px]">مرحله ۱ (ضربدر ۲)</div>
+                  <div className="text-purple-800 text-[10px]">مرحله ۱ (× ۲)</div>
                   <div className="text-sm text-slate-800 mt-0.5">{toPersianDigits(doubleThriceVal * 2)}</div>
                 </div>
                 <div className="bg-purple-100 p-2 rounded-xl border border-purple-300">
-                  <div className="text-purple-900 text-[10px]">مرحله ۲ (ضربدر ۴)</div>
+                  <div className="text-purple-900 text-[10px]">مرحله ۲ (× ۴)</div>
                   <div className="text-sm text-slate-900 mt-0.5">{toPersianDigits(doubleThriceVal * 4)}</div>
                 </div>
                 <div className="bg-purple-600 text-white p-2 rounded-xl border border-purple-700">
-                  <div className="text-purple-100 text-[10px]">مرحله ۳ (ضربدر ۸)</div>
+                  <div className="text-purple-100 text-[10px]">مرحله ۳ (× ۸)</div>
                   <div className="text-sm font-black mt-0.5">{toPersianDigits(doubleThriceVal * 8)}</div>
                 </div>
               </div>
@@ -820,14 +831,18 @@ export const TricksView: React.FC<TricksViewProps> = ({ onNavigateToPractice }) 
                 const d2 = elevenVal % 10;
                 const sum = d1 + d2;
                 return (
-                  <div className="bg-white p-3 rounded-xl border border-indigo-200 text-xs font-black text-slate-900 space-y-1">
+                  <div className="bg-white p-4 rounded-xl border border-indigo-200 text-xs font-black text-slate-900 text-center space-y-2">
                     <div className="flex justify-center">
-                      <MathFormula factor1={elevenVal} factor2={11} />
+                      <MathFormula factor1={elevenVal} factor2={11} size="normal" />
                     </div>
-                    <div className="text-indigo-800">
-                      رقم چپ: {toPersianDigits(d1)} | رقم راست: {toPersianDigits(d2)} | مجموع: {toPersianDigits(d1)} + {toPersianDigits(d2)} = <strong className="text-purple-700">{toPersianDigits(sum)}</strong>
+                    <div className="text-indigo-800 typo-caption">
+                      رقم چپ: {toPersianDigits(d1)} | رقم راست: {toPersianDigits(d2)}
                     </div>
-                    <div className="text-base text-emerald-600 font-black pt-1">
+                    <div className="flex flex-col items-center gap-0.5 bg-indigo-50/50 p-2 rounded-xl border border-indigo-100">
+                      <span className="text-[11px] text-slate-400 font-bold">مجموع ارقام:</span>
+                      <MathExpression expression={`${d1} + ${d2} = ${sum}`} size="normal" color="text-purple-800" />
+                    </div>
+                    <div className="text-base text-emerald-600 font-black pt-1 typo-body">
                       حاصل ضرب = {toPersianDigits(elevenVal * 11)}
                     </div>
                   </div>

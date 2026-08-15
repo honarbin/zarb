@@ -49,7 +49,7 @@ export const ALL_BADGES: Badge[] = [
 
 export const INITIAL_USER_STATS: UserStats = {
   username: 'قهرمان کوچک',
-  avatar: '🦁',
+  avatar: 'fox',
   totalScore: 0,
   highScore: 0,
   maxStreak: 0,
@@ -60,6 +60,9 @@ export const INITIAL_USER_STATS: UserStats = {
   soundEnabled: true,
   tableStats: {},
   unlockedBadges: ['first_practice'],
+  selectedHat: 'none',
+  selectedGlasses: 'none',
+  selectedAccessory: 'none',
 };
 
 export const loadUserStats = (): UserStats => {
@@ -68,7 +71,19 @@ export const loadUserStats = (): UserStats => {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (!raw) return INITIAL_USER_STATS;
     const data = JSON.parse(raw);
-    return { ...INITIAL_USER_STATS, ...data };
+    const stats = { ...INITIAL_USER_STATS, ...data };
+    
+    // Migrate old emoji avatars to modern character IDs
+    const validCharacters = ['robot', 'fox', 'panda', 'cat'];
+    if (!validCharacters.includes(stats.avatar)) {
+      stats.avatar = 'fox';
+    }
+    
+    if (!stats.selectedHat) stats.selectedHat = 'none';
+    if (!stats.selectedGlasses) stats.selectedGlasses = 'none';
+    if (!stats.selectedAccessory) stats.selectedAccessory = 'none';
+    
+    return stats;
   } catch {
     return INITIAL_USER_STATS;
   }

@@ -2,6 +2,7 @@ import React from 'react';
 import { Volume2, VolumeX, Sparkles, Trophy } from 'lucide-react';
 import { UserStats, AppView } from '../types';
 import { toPersianDigits } from '../utils/persian';
+import { GameCharacter } from './GameCharacter';
 
 interface HeaderProps {
   stats: UserStats;
@@ -65,10 +66,16 @@ export const Header: React.FC<HeaderProps> = ({ stats, onToggleSound, onNavigate
           {/* Profile Avatar Quick Link */}
           <button
             onClick={() => onNavigate('profile')}
-            className="w-10 h-10 rounded-2xl bg-white/90 border-2 border-amber-300 flex items-center justify-center text-xl shadow-sm hover:scale-105 transition-transform cursor-pointer"
+            className="w-10 h-10 rounded-2xl bg-white/90 border-2 border-amber-300 flex items-center justify-center shadow-sm hover:scale-105 transition-transform cursor-pointer overflow-hidden p-0.5"
             title="پروفایل من"
           >
-            {stats.avatar || '🦁'}
+            <GameCharacter
+              characterId={(stats.avatar as any) || 'fox'}
+              size="xs"
+              hat={stats.selectedHat}
+              glasses={stats.selectedGlasses}
+              accessory={stats.selectedAccessory}
+            />
           </button>
 
         </div>
