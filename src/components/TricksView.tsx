@@ -10,8 +10,6 @@ import {
   Trophy,
   ArrowRight,
   RotateCcw,
-  Volume2,
-  Pause,
   Zap,
   Layers,
   Award,
@@ -20,7 +18,7 @@ import {
   ChevronRight,
   Hand
 } from 'lucide-react';
-import { toPersianDigits, sounds, useAudioState } from '../utils/persian';
+import { toPersianDigits, sounds } from '../utils/persian';
 import { MathFormula } from './MathFormula';
 import { MathExpression } from './MathExpression';
 
@@ -321,8 +319,6 @@ export const TRICK_LIST: TrickDef[] = [
 ];
 
 export const TricksView: React.FC<TricksViewProps> = ({ onNavigateToPractice }) => {
-  const { isPlaying, speakPersian, stopSpeech } = useAudioState();
-
   // State for unlocked tricks
   const [unlockedIds, setUnlockedIds] = useState<string[]>(() => {
     const saved = localStorage.getItem('unlocked_tricks');
@@ -573,26 +569,6 @@ export const TricksView: React.FC<TricksViewProps> = ({ onNavigateToPractice }) 
                 </h2>
               </div>
             </div>
-
-            <button
-              type="button"
-              onClick={() => {
-                const trickAudioId = `trick-${activeTrick.id}`;
-                if (isPlaying(trickAudioId)) {
-                  stopSpeech();
-                } else {
-                  speakPersian(`${activeTrick.title}. ${activeTrick.shortDesc}. ${activeTrick.explanation}`, trickAudioId);
-                }
-              }}
-              className={`p-2.5 rounded-xl transition-all cursor-pointer ${
-                isPlaying(`trick-${activeTrick.id}`)
-                  ? 'bg-purple-600 text-white ring-4 ring-purple-200 animate-pulse scale-105'
-                  : 'bg-purple-100 text-purple-900 hover:bg-purple-200'
-              }`}
-              title={isPlaying(`trick-${activeTrick.id}`) ? 'توقف پخش' : 'پخش صوتی آموزش ترفند'}
-            >
-              {isPlaying(`trick-${activeTrick.id}`) ? <Pause className="w-5 h-5 fill-white" /> : <Volume2 className="w-5 h-5" />}
-            </button>
           </div>
 
           {/* Short Description & Formula Example */}

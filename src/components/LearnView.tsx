@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { BookOpen, Volume2, Pause, ArrowRight, Grid, Sparkles, Play, CheckCircle, Star } from 'lucide-react';
+import { BookOpen, ArrowRight, Grid, Sparkles, Play, CheckCircle, Star } from 'lucide-react';
 import { UserStats } from '../types';
-import { toPersianDigits, sounds, useAudioState } from '../utils/persian';
+import { toPersianDigits, sounds } from '../utils/persian';
 import { getTableProgress } from '../utils/storage';
 import { MathFormula } from './MathFormula';
 import { MathExpression } from './MathExpression';
@@ -19,20 +19,8 @@ export const LearnView: React.FC<LearnViewProps> = ({ stats, onStartTablePractic
   const [showPreLesson, setShowPreLesson] = useState<boolean>(true);
   const [expandedMultiplier, setExpandedMultiplier] = useState<number | null>(null);
 
-  const { isPlaying, speakTraditionalMultiplication, stopSpeech } = useAudioState();
-
-  // Read row aloud in traditional Persian rhythmic phrasing (e.g. "دو دوتا، چهارتا")
-  const handleSpeakRow = (f1: number, f2: number) => {
-    const rowId = `learn-table-${f1}-${f2}`;
-    if (isPlaying(rowId)) {
-      stopSpeech();
-    } else {
-      speakTraditionalMultiplication(f1, f2, rowId);
-    }
-  };
-
   const handleToggleCard = (f2: number) => {
-    stopSpeech();
+    sounds.playDing();
     setExpandedMultiplier((prev) => (prev === f2 ? null : f2));
   };
 
@@ -73,7 +61,7 @@ export const LearnView: React.FC<LearnViewProps> = ({ stats, onStartTablePractic
             کدام جدول ضرب رو می‌خواهی یاد بگیری؟ 📖
           </h2>
           <p className="text-xs text-sky-100 font-medium leading-relaxed">
-            یک کارت را انتخاب کن تا جدول ضرب آن را با توضیحات تصویری و صوتی ببینی.
+            یک کارت را انتخاب کن تا جدول ضرب آن را با توضیحات تصویری ببینی.
           </p>
         </div>
 
@@ -154,7 +142,6 @@ export const LearnView: React.FC<LearnViewProps> = ({ stats, onStartTablePractic
       <div className="flex items-center justify-between">
         <button
           onClick={() => {
-            stopSpeech();
             setSelectedTable(null);
             setExpandedMultiplier(null);
           }}
@@ -237,8 +224,6 @@ export const LearnView: React.FC<LearnViewProps> = ({ stats, onStartTablePractic
         {Array.from({ length: 10 }, (_, i) => i + 1).map((f2) => {
           const result = selectedTable * f2;
           const isExpanded = expandedMultiplier === f2;
-          const rowId = `learn-table-${selectedTable}-${f2}`;
-          const isRowPlaying = isPlaying(rowId);
 
           return (
             <motion.div
@@ -264,7 +249,7 @@ export const LearnView: React.FC<LearnViewProps> = ({ stats, onStartTablePractic
                         : 'bg-slate-100 text-slate-600 hover:bg-sky-100 hover:text-sky-800'
                     }`}
                   >
-                    {isExpanded ? 'بستن ▲' : 'مشاهده و پخش ▼'}
+                    {isExpanded ? 'بستن ▲' : 'مشاهده توضیحات ▼'}
                   </span>
                 </div>
 
@@ -367,33 +352,6 @@ export const LearnView: React.FC<LearnViewProps> = ({ stats, onStartTablePractic
                           );
                         })}
                       </div>
-                    </div>
-
-                    {/* Audio Playback Control */}
-                    <div className="flex justify-center pt-1">
-                      <button
-                        type="button"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleSpeakRow(selectedTable, f2);
-                        }}
-                        className={`w-full sm:w-auto px-6 py-3 rounded-2xl flex items-center justify-center gap-2.5 font-black text-sm shadow-md transition-all cursor-pointer ${
-                          isRowPlaying
-                            ? 'bg-amber-500 text-slate-950 ring-4 ring-amber-200 animate-pulse scale-102'
-                            : 'bg-sky-500 hover:bg-sky-600 text-white'
-                        }`}
-                      >
-                        {isRowPlaying ? (
-                          <Pause className="w-5 h-5 fill-slate-950" />
-                        ) : (
-                          <Volume2 className="w-5 h-5" />
-                        )}
-                        <span>
-                          {isRowPlaying
-                            ? 'توقف پخش'
-                            : '🔊 پخش صدا'}
-                        </span>
-                      </button>
                     </div>
 
                   </motion.div>

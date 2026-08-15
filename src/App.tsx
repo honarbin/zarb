@@ -17,7 +17,6 @@ import { SpeedChallengeView } from './components/SpeedChallengeView';
 import { RecordsView } from './components/RecordsView';
 import { ProfileView } from './components/ProfileView';
 import { SummaryView } from './components/SummaryView';
-import { AudioDiagnosticPanel } from './components/AudioDiagnosticPanel';
 
 export default function App() {
   const [currentView, setCurrentView] = useState<AppView>('concept');
@@ -96,11 +95,6 @@ export default function App() {
         onToggleSound={handleToggleSound}
         onNavigate={handleNavigate}
       />
-
-      {/* Audio Diagnostic Panel */}
-      <div className="max-w-4xl mx-auto px-4 w-full">
-        <AudioDiagnosticPanel />
-      </div>
 
       {/* Main Content Area */}
       <main className="flex-1">

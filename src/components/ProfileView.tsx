@@ -377,22 +377,23 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
       </div>
 
       {/* Sound & Audio Settings Section */}
+      {/* Sound Settings Section */}
       <div className="bg-white rounded-3xl p-5 shadow-md border-2 border-indigo-200 space-y-4">
         <div className="flex items-center justify-between border-b border-indigo-100 pb-3">
           <div className="flex items-center gap-2 text-indigo-900">
             <Sparkles className="w-6 h-6 text-indigo-500" />
-            <h3 className="font-black text-base">تنظیمات صدا و گوینده 🔊</h3>
+            <h3 className="font-black text-base">تنظیمات صدا</h3>
           </div>
           <span className="text-[10px] bg-indigo-100 text-indigo-800 font-extrabold px-2.5 py-1 rounded-full">
-            فارسی معیّار کودکان
+            افکت‌های صوتی
           </span>
         </div>
 
         <div className="space-y-3">
           <div className="flex items-center justify-between p-3 bg-indigo-50/60 rounded-2xl border border-indigo-100">
             <div>
-              <h4 className="font-bold text-xs text-slate-800">فعال بودن سیستم صوتی</h4>
-              <p className="text-[11px] text-slate-500">پخش افکت‌ها و خواندن ضرب‌ها به زبان فارسی</p>
+              <h4 className="font-bold text-xs text-slate-800">فعال بودن افکت‌های صوتی</h4>
+              <p className="text-[11px] text-slate-500">پخش افکت‌های صوتی پاسخ درست، اشتباه و پیروزی</p>
             </div>
             <button
               onClick={() => {
@@ -406,22 +407,7 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
                   : 'bg-slate-200 text-slate-600'
               }`}
             >
-              {stats.soundEnabled ? 'روشن 🔊' : 'خاموش 🔇'}
-            </button>
-          </div>
-
-          <div className="flex items-center justify-between p-3 bg-amber-50/60 rounded-2xl border border-amber-100">
-            <div>
-              <h4 className="font-bold text-xs text-slate-800">تست صدای گوینده کودکانه</h4>
-              <p className="text-[11px] text-slate-500">پخش پیام تشویقی نمونه</p>
-            </div>
-            <button
-              onClick={() => {
-                sounds.playCorrectSound();
-              }}
-              className="px-3.5 py-1.5 bg-amber-500 hover:bg-amber-600 text-slate-900 rounded-xl font-black text-xs cursor-pointer shadow-xs"
-            >
-              پخش نمونه 🎵
+              {stats.soundEnabled ? 'روشن' : 'خاموش'}
             </button>
           </div>
         </div>

@@ -8,8 +8,6 @@ import {
   RotateCcw,
   CheckCircle2,
   XCircle,
-  Volume2,
-  Pause,
   ArrowRight,
   Layers,
   Award,
@@ -18,7 +16,7 @@ import {
   Zap,
   BookOpen
 } from 'lucide-react';
-import { toPersianDigits, sounds, useAudioState } from '../utils/persian';
+import { toPersianDigits, sounds } from '../utils/persian';
 import { MathFormula } from './MathFormula';
 import { MathExpression } from './MathExpression';
 import { GameCharacter } from './GameCharacter';
@@ -47,7 +45,6 @@ export const ConceptView: React.FC<ConceptViewProps> = ({
   onNavigateToPractice,
 }) => {
   const [activeTab, setActiveTab] = useState<ConceptSubTab>('lessons');
-  const { isPlaying, speakPersian, speakTraditionalMultiplication, stopSpeech } = useAudioState();
 
   // --- Sub-Tab 1 State: Lessons & Commutativity Toggle ---
   const [commutativityOrder, setCommutativityOrder] = useState<'3x4' | '4x3'>('3x4');
@@ -370,28 +367,6 @@ export const ConceptView: React.FC<ConceptViewProps> = ({
                   ضرب همان «جمع تکراری» است!
                 </h3>
               </div>
-              <button
-                type="button"
-                onClick={() => {
-                  const id = 'concept-card-1';
-                  if (isPlaying(id)) {
-                    stopSpeech();
-                  } else {
-                    speakPersian(
-                      'سه ضرب در چهار یعنی سه گروه داریم و در هر گروه چهار تاست. چهار به علاوه چهار به علاوه چهار می‌شود دوازده.',
-                      id
-                    );
-                  }
-                }}
-                className={`p-2.5 rounded-xl transition-all cursor-pointer ${
-                  isPlaying('concept-card-1')
-                    ? 'bg-amber-500 text-slate-950 ring-4 ring-amber-200 animate-pulse scale-105'
-                    : 'bg-amber-100 text-amber-900 hover:bg-amber-200'
-                }`}
-                title={isPlaying('concept-card-1') ? 'توقف پخش' : 'پخش صوت توضیحات'}
-              >
-                {isPlaying('concept-card-1') ? <Pause className="w-5 h-5 fill-slate-950" /> : <Volume2 className="w-5 h-5" />}
-              </button>
             </div>
 
             <p className="text-xs text-slate-700 leading-relaxed font-bold">
@@ -470,28 +445,6 @@ export const ConceptView: React.FC<ConceptViewProps> = ({
                   آموزش «گروه‌های مساوی»
                 </h3>
               </div>
-              <button
-                type="button"
-                onClick={() => {
-                  const id = 'concept-card-2';
-                  if (isPlaying(id)) {
-                    stopSpeech();
-                  } else {
-                    speakPersian(
-                      'اگر چهار بشقاب داشته باشیم و داخل هر بشقاب سه سیب باشد، چهار ضرب در سه می‌شود دوازده سیب.',
-                      id
-                    );
-                  }
-                }}
-                className={`p-2.5 rounded-xl transition-all cursor-pointer ${
-                  isPlaying('concept-card-2')
-                    ? 'bg-sky-500 text-white ring-4 ring-sky-200 animate-pulse scale-105'
-                    : 'bg-sky-100 text-sky-900 hover:bg-sky-200'
-                }`}
-                title={isPlaying('concept-card-2') ? 'توقف پخش' : 'پخش صوت توضیحات'}
-              >
-                {isPlaying('concept-card-2') ? <Pause className="w-5 h-5 fill-white" /> : <Volume2 className="w-5 h-5" />}
-              </button>
             </div>
 
             <div className="bg-sky-50/80 p-3.5 rounded-2xl border border-sky-200 text-xs font-bold text-slate-800 leading-relaxed">
@@ -1070,8 +1023,6 @@ export const ConceptView: React.FC<ConceptViewProps> = ({
                 .map(() => toPersianDigits(preTableNum))
                 .join(' + ');
               const product = preTableNum * factor2;
-              const rowId = `concept-pretable-${preTableNum}-${factor2}`;
-              const isRowPlaying = isPlaying(rowId);
 
               return (
                 <div key={factor2} className="py-2.5 flex items-center justify-between text-xs font-bold text-slate-800">
@@ -1087,25 +1038,6 @@ export const ConceptView: React.FC<ConceptViewProps> = ({
                   <div className="text-slate-600 font-medium dir-ltr">
                     {repeatedAdd} = <strong className="text-emerald-600 font-black text-sm">{toPersianDigits(product)}</strong>
                   </div>
-
-                  <button
-                    type="button"
-                    onClick={() => {
-                      if (isRowPlaying) {
-                        stopSpeech();
-                      } else {
-                        speakTraditionalMultiplication(preTableNum, factor2, rowId);
-                      }
-                    }}
-                    className={`p-1.5 rounded-lg transition-all cursor-pointer border ${
-                      isRowPlaying
-                        ? 'bg-purple-600 text-white border-purple-700 ring-2 ring-purple-300 animate-pulse scale-105'
-                        : 'bg-white text-purple-700 hover:bg-purple-100 border-purple-200'
-                    }`}
-                    title={isRowPlaying ? 'توقف پخش' : 'خواندن صوتی سنتی (دو دوتا، چهارتا)'}
-                  >
-                    {isRowPlaying ? <Pause className="w-3.5 h-3.5 fill-white" /> : <Volume2 className="w-3.5 h-3.5" />}
-                  </button>
                 </div>
               );
             })}
