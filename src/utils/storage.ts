@@ -134,6 +134,267 @@ export const recordQuestionResult = (
   return newStats;
 };
 
+// Calculate progress for a specific multiplication table (1 to 10)
+export interface TableProgressInfo {
+  masteredCount: number;
+  totalCount: number;
+  percentage: number;
+  stars: number; // 0 to 3
+}
+
+export const getTableProgress = (stats: UserStats, tableNum: number): TableProgressInfo => {
+  let masteredCount = 0;
+  const totalCount = 10;
+
+  for (let m = 1; m <= 10; m++) {
+    const key = `${Math.min(tableNum, m)}x${Math.max(tableNum, m)}`;
+    const stat = stats.tableStats?.[key];
+    if (stat && stat.correct > 0) {
+      masteredCount++;
+    }
+  }
+
+  const percentage = Math.round((masteredCount / totalCount) * 100);
+  let stars = 0;
+  if (masteredCount >= 10) {
+    stars = 3;
+  } else if (masteredCount >= 6) {
+    stars = 2;
+  } else if (masteredCount >= 2) {
+    stars = 1;
+  }
+
+  return {
+    masteredCount,
+    totalCount,
+    percentage,
+    stars,
+  };
+};
+
+export interface TableDetailedStats {
+  tableNum: number;
+  masteredCount: number;
+  totalCount: number;
+  percentage: number;
+  stars: number;
+  totalAttempts: number;
+  totalCorrect: number;
+  totalWrong: number;
+  accuracy: number;
+  status: 'not_started' | 'learning' | 'good' | 'mastered';
+  statusLabel: string;
+}
+
+export const getTableDetailedStats = (stats: UserStats, tableNum: number): TableDetailedStats => {
+  let masteredCount = 0;
+  let totalAttempts = 0;
+  let totalCorrect = 0;
+  let totalWrong = 0;
+  const totalCount = 10;
+
+  for (let m = 1; m <= 10; m++) {
+    const key = `${Math.min(tableNum, m)}x${Math.max(tableNum, m)}`;
+    const stat = stats.tableStats?.[key];
+    if (stat) {
+      totalAttempts += stat.attempts || 0;
+      totalCorrect += stat.correct || 0;
+      totalWrong += stat.wrong || 0;
+      if (stat.correct > 0) {
+        masteredCount++;
+      }
+    }
+  }
+
+  const percentage = Math.round((masteredCount / totalCount) * 100);
+  const accuracy = totalAttempts > 0 ? Math.round((totalCorrect / totalAttempts) * 100) : 0;
+
+  let stars = 0;
+  if (masteredCount >= 10 && accuracy >= 80) {
+    stars = 3;
+  } else if (masteredCount >= 6) {
+    stars = 2;
+  } else if (masteredCount >= 2) {
+    stars = 1;
+  }
+
+  let status: 'not_started' | 'learning' | 'good' | 'mastered' = 'not_started';
+  let statusLabel = 'شروع نشده';
+
+  if (totalAttempts === 0) {
+    status = 'not_started';
+    statusLabel = 'شروع نشده';
+  } else if (masteredCount === 10 && accuracy >= 85) {
+    status = 'mastered';
+    statusLabel = 'عالی';
+  } else if (masteredCount >= 6 || (totalAttempts >= 5 && accuracy >= 70)) {
+    status = 'good';
+    statusLabel = 'خوب';
+  } else {
+    status = 'learning';
+    statusLabel = 'در حال یادگیری';
+  }
+
+  return {
+    tableNum,
+    masteredCount,
+    totalCount,
+    percentage,
+    stars,
+    totalAttempts,
+    totalCorrect,
+    totalWrong,
+    accuracy,
+    status,
+    statusLabel,
+  };
+};
+
+export interface RealMistake {
+  factor1: number;
+  factor2: number;
+  attempts: number;
+  correct: number;
+  wrong: number;
+  errorRate: number;
+}
+
+export const getRealMistakesList = (stats: UserStats): RealMistake[] => {
+  const mistakes: RealMistake[] = [];
+  
+  if (!stats.tableStats) return mistakes;
+
+  Object.values(stats.tableStats).forEach((item) => {
+    if (item && item.wrong > 0) {
+      mistakes.push({
+        factor1: item.factor1,
+        factor2: item.factor2,
+        attempts: item.attempts,
+        correct: item.correct,
+        wrong: item.wrong,
+        errorRate: item.attempts > 0 ? item.wrong / item.attempts : 1,
+      });
+    }
+  });
+
+  // Sort by highest mistake count descending, then by attempts
+  mistakes.sort((a, b) => b.wrong - a.wrong || b.errorRate - a.errorRate || b.attempts - a.attempts);
+
+  return mistakes;
+};
+
+export interface SmartRecommendation {
+  type: 'start' | 'fix_mistake' | 'improve_table' | 'new_table' | 'speed_challenge';
+  title: string;
+  description: string;
+  tableTarget?: number;
+  highlightPair?: { factor1: number; factor2: number; wrongCount: number };
+  actionLabel: string;
+  badgeText: string;
+}
+
+export const getSmartRecommendation = (stats: UserStats): SmartRecommendation => {
+  const totalAnswers = stats.totalCorrect + stats.totalWrong;
+
+  // Case 1: Fresh user / No practice yet
+  if (totalAnswers === 0 || stats.totalPractices === 0) {
+    return {
+      type: 'start',
+      title: 'آغاز مسیر طلایی یادگیری ضرب',
+      description: 'کودک شما هنوز تمرینی ثبت نکرده است. بهترین نقطه برای شروع و افزایش اعتمادبه‌نفس، تمرین جدول‌های پایه‌ای ۲ و ۳ است.',
+      tableTarget: 2,
+      actionLabel: 'شروع تمرین جدول ۲',
+      badgeText: 'گام نخست 🌱',
+    };
+  }
+
+  // Case 2: Specific frequent mistakes exist
+  const mistakes = getRealMistakesList(stats);
+  const severeMistake = mistakes.find((m) => m.wrong >= 2);
+  if (severeMistake) {
+    return {
+      type: 'fix_mistake',
+      title: `تثبیت ضرب ${severeMistake.factor1} × ${severeMistake.factor2}`,
+      description: `کودک در ضرب ${severeMistake.factor1} × ${severeMistake.factor2} با ${severeMistake.wrong} بار خطای ثبت‌شده نیاز به مرور دارد. تمرین روی جدول ${severeMistake.factor1} به درک بهتر الگو کمک خواهد کرد.`,
+      tableTarget: severeMistake.factor1,
+      highlightPair: {
+        factor1: severeMistake.factor1,
+        factor2: severeMistake.factor2,
+        wrongCount: severeMistake.wrong,
+      },
+      actionLabel: `تمرین جدول ${severeMistake.factor1}`,
+      badgeText: 'اولویت مرور 🎯',
+    };
+  }
+
+  // Case 3: A table has weak accuracy or many wrongs
+  const tableStatsList: TableDetailedStats[] = [];
+  for (let i = 1; i <= 10; i++) {
+    tableStatsList.push(getTableDetailedStats(stats, i));
+  }
+
+  // Find table with lowest accuracy among attempted tables that have wrong > 0
+  const attemptedWithWrongs = tableStatsList.filter((t) => t.totalAttempts > 0 && t.totalWrong > 0);
+  if (attemptedWithWrongs.length > 0) {
+    attemptedWithWrongs.sort((a, b) => a.accuracy - b.accuracy || b.totalWrong - a.totalWrong);
+    const weakest = attemptedWithWrongs[0];
+    return {
+      type: 'improve_table',
+      title: `بهبود دقت در جدول ${weakest.tableNum}`,
+      description: `جدول ${weakest.tableNum} با دقت %${weakest.accuracy} و ${weakest.totalWrong} پاسخ اشتباه نیاز به تمرین و تثبیت بیشتری دارد تا به وضعیت عالی ارتقا یابد.`,
+      tableTarget: weakest.tableNum,
+      actionLabel: `تمرین جدول ${weakest.tableNum}`,
+      badgeText: 'نیاز به تمرین 📈',
+    };
+  }
+
+  // Case 4: Tables in learning phase (low mastered count)
+  const learningTables = tableStatsList.filter((t) => t.totalAttempts > 0 && t.percentage < 100);
+  if (learningTables.length > 0) {
+    learningTables.sort((a, b) => a.percentage - b.percentage);
+    const target = learningTables[0];
+    return {
+      type: 'improve_table',
+      title: `تکمیل یادگیری جدول ${target.tableNum}`,
+      description: `کودک ${target.masteredCount} ضرب از ۱۰ ضرب جدول ${target.tableNum} را فراگرفته است. با یک دور تمرین، این جدول را ۱۰۰٪ کنید.`,
+      tableTarget: target.tableNum,
+      actionLabel: `تکمیل جدول ${target.tableNum}`,
+      badgeText: 'در حال رشد 🌱',
+    };
+  }
+
+  // Case 5: Unstarted tables
+  const unstarted = tableStatsList.filter((t) => t.totalAttempts === 0);
+  if (unstarted.length > 0) {
+    const nextTable = unstarted[0];
+    return {
+      type: 'new_table',
+      title: `یادگیری جدول جدید: جدول ${nextTable.tableNum}`,
+      description: `عملکرد کودک در جدول‌های قبلی بسیار خوب بوده است! گام منطقی بعدی، آغاز یادگیری جدول ${nextTable.tableNum} است.`,
+      tableTarget: nextTable.tableNum,
+      actionLabel: `شروع یادگیری جدول ${nextTable.tableNum}`,
+      badgeText: 'مرحله جدید 🚀',
+    };
+  }
+
+  // Case 6: Mastered everything - recommend speed challenge
+  return {
+    type: 'speed_challenge',
+    title: 'تسلط کامل و چالش سرعت و تمرکز',
+    description: 'تسلط کودک بر تمام جدول‌های ضرب فوق‌العاده است! برای افزایش سرعت عمل و واکنش ذهنی، مسابقه ۶۰ ثانیه‌ای سرعتی عالی‌ترین انتخاب است.',
+    actionLabel: 'ورود به مسابقه سرعتی',
+    badgeText: 'سطح استادی 👑',
+  };
+};
+
+export const getTotalStars = (stats: UserStats): number => {
+  let total = 0;
+  for (let i = 1; i <= 10; i++) {
+    total += getTableProgress(stats, i).stars;
+  }
+  return total;
+};
+
 // Check for newly unlocked badges
 export const checkBadges = (stats: UserStats): UserStats => {
   const unlocked = new Set(stats.unlockedBadges || []);
@@ -216,23 +477,22 @@ export const getWeaknessList = (stats: UserStats): WeaknessItem[] => {
 export const generateQuestion = (
   level: DifficultyLevel,
   stats: UserStats,
-  specificTable?: number
+  specificTable?: number | number[]
 ): Question => {
-  let minFactor = 1;
-  let maxFactor = 10;
+  let allowedTables: number[] = [];
 
-  if (specificTable) {
-    minFactor = specificTable;
-    maxFactor = specificTable;
+  if (specificTable !== undefined && specificTable !== null) {
+    if (Array.isArray(specificTable)) {
+      allowedTables = specificTable.length > 0 ? specificTable : Array.from({ length: 10 }, (_, i) => i + 1);
+    } else {
+      allowedTables = [specificTable];
+    }
   } else if (level === 'easy') {
-    minFactor = 1;
-    maxFactor = 5;
+    allowedTables = [1, 2, 3, 4, 5];
   } else if (level === 'medium') {
-    minFactor = 1;
-    maxFactor = 7;
+    allowedTables = [1, 2, 3, 4, 5, 6, 7];
   } else if (level === 'hard') {
-    minFactor = 1;
-    maxFactor = 10;
+    allowedTables = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
   } else if (level === 'weaknesses') {
     const weaknesses = getWeaknessList(stats);
     if (weaknesses.length > 0) {
@@ -243,12 +503,15 @@ export const generateQuestion = (
       const f2 = flip ? picked.factor2 : picked.factor1;
       return createQuestionWithChoices(f1, f2);
     }
+    allowedTables = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+  } else {
+    allowedTables = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
   }
 
   // Generate potential candidates
   const pool: { f1: number; f2: number; weight: number }[] = [];
 
-  for (let f1 = minFactor; f1 <= maxFactor; f1++) {
+  for (const f1 of allowedTables) {
     for (let f2 = 1; f2 <= 10; f2++) {
       const key = `${Math.min(f1, f2)}x${Math.max(f1, f2)}`;
       const stat = stats.tableStats[key];
@@ -271,7 +534,7 @@ export const generateQuestion = (
   const totalWeight = pool.reduce((acc, curr) => acc + curr.weight, 0);
   let randomVal = Math.random() * totalWeight;
 
-  let selected = pool[0];
+  let selected = pool[0] || { f1: 2, f2: 3, weight: 1 };
   for (const item of pool) {
     if (randomVal <= item.weight) {
       selected = item;
@@ -284,7 +547,7 @@ export const generateQuestion = (
 };
 
 // Generate 4 plausible multiple choice options (including correct answer)
-const createQuestionWithChoices = (f1: number, f2: number): Question => {
+export const createQuestionWithChoices = (f1: number, f2: number): Question => {
   const correctAnswer = f1 * f2;
   const optionsSet = new Set<number>();
   optionsSet.add(correctAnswer);

@@ -8,6 +8,8 @@ interface MathFormulaProps {
   className?: string;
   symbolColor?: string;
   size?: 'small' | 'normal' | 'large' | 'display';
+  highlightFactor?: 1 | 2;
+  highlightFactorClass?: string;
 }
 
 /**
@@ -22,6 +24,8 @@ export const MathFormula: React.FC<MathFormulaProps> = ({
   className = '',
   symbolColor = '',
   size = 'normal',
+  highlightFactor,
+  highlightFactorClass = 'text-amber-600 bg-amber-100/80 px-2 py-0.5 rounded-xl border border-amber-300 font-black',
 }) => {
   const f1Text = typeof factor1 === 'number' ? toPersianDigits(factor1) : factor1;
   const f2Text = typeof factor2 === 'number' ? toPersianDigits(factor2) : factor2;
@@ -43,9 +47,17 @@ export const MathFormula: React.FC<MathFormulaProps> = ({
       className={`math-expression math-flex inline-flex items-center gap-2.5 font-black dir-ltr ${sizeClass} ${className}`}
       style={{ direction: 'ltr', unicodeBidi: 'isolate' }}
     >
-      <span>{f1Text}</span>
+      {highlightFactor === 1 ? (
+        <span className={highlightFactorClass}>{f1Text}</span>
+      ) : (
+        <span>{f1Text}</span>
+      )}
       <span className={`${symbolColor || 'text-amber-500'} mx-0.5`}>×</span>
-      <span>{f2Text}</span>
+      {highlightFactor === 2 ? (
+        <span className={highlightFactorClass}>{f2Text}</span>
+      ) : (
+        <span>{f2Text}</span>
+      )}
       {ansText !== null && (
         <>
           <span className="text-slate-400 opacity-80 mx-0.5">=</span>

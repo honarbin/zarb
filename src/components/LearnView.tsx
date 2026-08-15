@@ -1,16 +1,19 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { BookOpen, Volume2, Pause, ArrowRight, Grid, Sparkles, Play, CheckCircle } from 'lucide-react';
+import { BookOpen, Volume2, Pause, ArrowRight, Grid, Sparkles, Play, CheckCircle, Star } from 'lucide-react';
+import { UserStats } from '../types';
 import { toPersianDigits, sounds, useAudioState } from '../utils/persian';
+import { getTableProgress } from '../utils/storage';
 import { MathFormula } from './MathFormula';
 import { MathExpression } from './MathExpression';
 
 interface LearnViewProps {
+  stats?: UserStats;
   onStartTablePractice: (tableNum: number) => void;
   onNavigateToConcept?: () => void;
 }
 
-export const LearnView: React.FC<LearnViewProps> = ({ onStartTablePractice, onNavigateToConcept }) => {
+export const LearnView: React.FC<LearnViewProps> = ({ stats, onStartTablePractice, onNavigateToConcept }) => {
   const [selectedTable, setSelectedTable] = useState<number | null>(null);
   const [activeVisualPair, setActiveVisualPair] = useState<{ f1: number; f2: number } | null>(null);
   const [showPreLesson, setShowPreLesson] = useState<boolean>(true);
@@ -90,6 +93,7 @@ export const LearnView: React.FC<LearnViewProps> = ({ onStartTablePractice, onNa
               'bg-violet-500 border-violet-600',
             ];
             const colorClass = bgColors[(num - 1) % bgColors.length];
+            const prog = stats ? getTableProgress(stats, num) : { percentage: 0, stars: 0, masteredCount: 0 };
 
             return (
               <motion.button
@@ -100,19 +104,38 @@ export const LearnView: React.FC<LearnViewProps> = ({ onStartTablePractice, onNa
                   setSelectedTable(num);
                   setActiveVisualPair({ f1: num, f2: 1 });
                 }}
-                className={`p-5 rounded-2xl ${colorClass} text-white shadow-md border-b-4 text-right flex flex-col justify-between cursor-pointer group h-32 relative overflow-hidden`}
+                className={`p-4 sm:p-5 rounded-2xl ${colorClass} text-white shadow-md border-b-4 text-right flex flex-col justify-between cursor-pointer group min-h-[140px] relative overflow-hidden`}
               >
-                <div className="flex justify-between items-start">
-                  <span className="text-3xl font-black text-white drop-shadow">
+                <div className="flex justify-between items-start gap-1.5">
+                  <span className="text-xl sm:text-2xl font-black text-white drop-shadow whitespace-nowrap">
                     جدول {toPersianDigits(num)}
                   </span>
-                  <div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center text-white group-hover:bg-white group-hover:text-slate-900 transition-colors">
+                  <div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center text-white group-hover:bg-white group-hover:text-slate-900 transition-colors shrink-0">
                     📖
                   </div>
                 </div>
 
-                <div className="text-[11px] font-extrabold text-white/90 bg-black/10 px-2.5 py-1 rounded-xl w-max">
-                  مشاهده ۱۰ ضرب ←
+                {/* Progress bar and Stars */}
+                <div className="space-y-1.5 w-full pt-2">
+                  <div className="flex items-center justify-between text-[11px] font-black text-white/95">
+                    <span className="flex items-center gap-0.5">
+                      {[1, 2, 3].map((s) => (
+                        <span key={s} className={`text-xs ${s <= prog.stars ? 'text-amber-200 drop-shadow' : 'text-white/30'}`}>
+                          ★
+                        </span>
+                      ))}
+                    </span>
+                    <span className="text-[10px] bg-black/20 px-1.5 py-0.5 rounded-lg">
+                      {toPersianDigits(prog.masteredCount)} از ۱۰
+                    </span>
+                  </div>
+                  {/* Mini Progress Bar */}
+                  <div className="w-full bg-black/25 h-1.5 rounded-full overflow-hidden">
+                    <div
+                      className="bg-amber-300 h-full rounded-full transition-all duration-300"
+                      style={{ width: `${prog.percentage}%` }}
+                    />
+                  </div>
                 </div>
               </motion.button>
             );
@@ -186,12 +209,19 @@ export const LearnView: React.FC<LearnViewProps> = ({ onStartTablePractice, onNa
               قبل از حفظ کردن، ببین چطور اعداد با جمع تکراری بزرگتر می‌شوند:
             </p>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-1">
-              {Array.from({ length: 4 }, (_, i) => i + 1).map((multiplier) => {
+              {Array.from({ length: 3 }, (_, i) => i + 1).map((multiplier) => {
                 const repeatedSumExpr = Array.from({ length: multiplier })
                   .map(() => selectedTable)
                   .join(' + ') + ` = ${selectedTable * multiplier}`;
+                const isFullWidth = multiplier === 3;
                 return (
-                  <div key={multiplier} className="bg-amber-100/60 p-3 rounded-xl border border-amber-200 flex items-center justify-between gap-2 flex-wrap">
+                  <div
+                    key={multiplier}
+                    style={{ gridColumn: isFullWidth ? '1 / -1' : undefined }}
+                    className={`bg-amber-100/60 p-3 rounded-xl border border-amber-200 flex items-center justify-between gap-2 flex-wrap ${
+                      isFullWidth ? 'col-span-full sm:col-span-2' : ''
+                    }`}
+                  >
                     <MathFormula factor1={selectedTable} factor2={multiplier} size="small" className="text-amber-900" />
                     <MathExpression expression={repeatedSumExpr} size="small" color="text-slate-700" symbolColor="text-slate-400" />
                   </div>
@@ -226,25 +256,6 @@ export const LearnView: React.FC<LearnViewProps> = ({ onStartTablePractice, onNa
                 onClick={() => handleToggleCard(f2)}
                 className="w-full p-4 flex items-center justify-between cursor-pointer text-right bg-transparent"
               >
-                <div className="flex items-center gap-3">
-                  <div
-                    className={`w-10 h-10 rounded-xl flex items-center justify-center font-black text-sm transition-colors ${
-                      isExpanded ? 'bg-amber-500 text-slate-950' : 'bg-sky-100 text-sky-800'
-                    }`}
-                  >
-                    {toPersianDigits(f2)}
-                  </div>
-                  
-                  {/* Card header formula view - always show full equation */}
-                  <MathFormula
-                    factor1={selectedTable}
-                    factor2={f2}
-                    answer={result}
-                    className="text-lg font-black text-slate-800"
-                    symbolColor="text-amber-500"
-                  />
-                </div>
-
                 <div className="flex items-center gap-2">
                   <span
                     className={`text-xs font-black px-3 py-1.5 rounded-xl transition-colors ${
@@ -255,6 +266,19 @@ export const LearnView: React.FC<LearnViewProps> = ({ onStartTablePractice, onNa
                   >
                     {isExpanded ? 'بستن ▲' : 'مشاهده و پخش ▼'}
                   </span>
+                </div>
+
+                <div className="flex items-center gap-3">
+                  {/* Card header formula view with highlighted multiplier */}
+                  <MathFormula
+                    factor1={selectedTable}
+                    factor2={f2}
+                    answer={result}
+                    highlightFactor={2}
+                    highlightFactorClass="text-amber-700 bg-amber-100 px-2 py-0.5 rounded-xl border border-amber-300/80 font-black"
+                    className="text-lg font-black text-slate-800"
+                    symbolColor="text-amber-500"
+                  />
                 </div>
               </button>
 

@@ -40,14 +40,17 @@ export const Header: React.FC<HeaderProps> = ({ stats, onToggleSound, onNavigate
         {/* Right Controls: Score Pill, Sound Toggle, Profile Avatar */}
         <div className="flex items-center gap-2">
           
-          {/* Total Score Display */}
+          {/* Total Score & Progress Report Display */}
           <button
             onClick={() => onNavigate('records')}
-            className="flex items-center gap-1.5 bg-amber-100/90 hover:bg-white text-amber-900 px-3 py-1.5 rounded-2xl border-2 border-amber-300 shadow-sm font-black text-sm transition-all cursor-pointer"
-            title="امتیازات و رکوردهای من"
+            className="flex items-center gap-1.5 bg-amber-100/90 hover:bg-white text-amber-900 px-3 py-1.5 rounded-2xl border-2 border-amber-300 shadow-sm font-black text-xs sm:text-sm transition-all cursor-pointer"
+            title="گزارش و پیشرفت تحصیلی (ویژه والدین)"
           >
             <Trophy className="w-4 h-4 text-amber-600 fill-amber-400" />
             <span>{toPersianDigits(stats.totalScore)}</span>
+            <span className="text-[10px] bg-amber-400/70 text-slate-950 px-1.5 py-0.5 rounded-lg hidden sm:inline font-bold">
+              گزارش
+            </span>
           </button>
 
           {/* Sound Toggle Button */}

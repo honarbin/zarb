@@ -113,7 +113,7 @@ export const getTraditionalPersianMultiplicationPhrase = (f1: number, f2: number
   return `${f1Word} ${f2Word}، ${resWord}`;
 };
 
-// Web Audio API & Cross-Platform Speech Engine (Web & Android Compatible)
+// Web Audio API & Cross-Platform Sound & Speech Engine (Zero Latency, Offline Ready)
 class SoundEffects {
   private audioCtx: AudioContext | null = null;
   private currentAudio: HTMLAudioElement | null = null;
@@ -211,32 +211,12 @@ class SoundEffects {
     return this.audioCtx;
   }
 
-  // Preload key audio files into browser cache for instant playback
+  // Preload helper (only for core multiplication tables if desired)
   public preloadKeyAudio() {
-    if (typeof window === 'undefined') return;
-    const keyPaths = [
-      '/audio/correct/correct_01.mp3',
-      '/audio/correct/correct_02.mp3',
-      '/audio/correct/correct_03.mp3',
-      '/audio/wrong/wrong_01.mp3',
-      '/audio/wrong/wrong_02.mp3',
-      '/audio/wrong/wrong_03.mp3',
-      '/audio/instructions/game_start.mp3',
-      '/audio/rewards/level_complete.mp3',
-      '/audio/rewards/reward_star.mp3',
-      '/audio/rewards/reward_badge.mp3',
-    ];
-
-    keyPaths.forEach((path) => {
-      if (!this.audioCache.has(path)) {
-        const audio = new Audio(path);
-        audio.preload = 'auto';
-        this.audioCache.set(path, audio);
-      }
-    });
+    // Web Audio SFX are instant and require zero network preloading!
   }
 
-  // Helper to play an MP3 path cleanly with ID and volume controls
+  // Helper to play an MP3 path cleanly with ID and volume controls (used for learning tables)
   private playMp3File(mp3Path: string, id: string, volume: number = 1.0, onEndedCallback?: () => void): void {
     if (!this.soundEnabled) return;
     this.unlockAudioContext();
@@ -253,7 +233,12 @@ class SoundEffects {
         audio = new Audio(mp3Path);
         this.audioCache.set(mp3Path, audio);
       } else {
-        audio.currentTime = 0;
+        try {
+          audio.pause();
+          audio.currentTime = 0;
+        } catch {
+          // ignore
+        }
       }
 
       audio.volume = Math.max(0, Math.min(1, volume));
@@ -268,8 +253,9 @@ class SoundEffects {
         if (onEndedCallback) onEndedCallback();
       };
 
-      audio.onerror = () => {
-        console.warn(`فایل صوتی یافت نشد یا قابل پخش نیست: ${mp3Path}`);
+      audio.onerror = (e) => {
+        const err = audio?.error;
+        console.warn(`[Zarbyar Audio] اطلاعات فایل صوتی: ${mp3Path}`, err?.message);
         if (this.currentPlayingId === id) {
           this.currentPlayingId = null;
           this.currentAudio = null;
@@ -279,8 +265,7 @@ class SoundEffects {
 
       const playPromise = audio.play();
       if (playPromise !== undefined) {
-        playPromise.catch((err: Error) => {
-          console.warn(`خطا در پخش صوتی [${err.name}]: ${err.message}`);
+        playPromise.catch(() => {
           if (this.currentPlayingId === id) {
             this.currentPlayingId = null;
             this.currentAudio = null;
@@ -288,8 +273,7 @@ class SoundEffects {
           }
         });
       }
-    } catch (err) {
-      console.warn(`خطا در اجرای Audio:`, err);
+    } catch {
       if (this.currentPlayingId === id) {
         this.currentPlayingId = null;
         this.currentAudio = null;
@@ -298,145 +282,195 @@ class SoundEffects {
     }
   }
 
-  // Play a happy success chord + Persian praise voice
-  playCorrectSound() {
-    if (!this.soundEnabled) return;
-
-    // 1. Play synthesized chord
+  // 1. ✨ Short Pleasant Ding / Success SFX (for selections, revealing answers, tapping 'بلدم')
+  public playDing() {
+    if (!this.soundEnabled || this.sfxVolume <= 0) return;
     try {
       const ctx = this.getContext();
-      if (ctx && this.sfxVolume > 0) {
-        const now = ctx.currentTime;
-        const notes = [523.25, 659.25, 783.99, 1046.50]; // C5, E5, G5, C6
-        
-        notes.forEach((freq, idx) => {
-          const osc = ctx.createOscillator();
-          const gain = ctx.createGain();
-          osc.type = 'triangle';
-          osc.frequency.setValueAtTime(freq, now + idx * 0.05);
+      if (!ctx) return;
+      const now = ctx.currentTime;
 
-          const vol = 0.2 * this.sfxVolume;
-          gain.gain.setValueAtTime(0, now + idx * 0.05);
-          gain.gain.linearRampToValueAtTime(vol, now + idx * 0.05 + 0.02);
-          gain.gain.exponentialRampToValueAtTime(0.001, now + idx * 0.05 + 0.25);
-
-          osc.connect(gain);
-          gain.connect(ctx.destination);
-
-          osc.start(now + idx * 0.05);
-          osc.stop(now + idx * 0.05 + 0.3);
-        });
-      }
-    } catch {
-      // Ignore
-    }
-
-    // 2. Play spoken praise
-    if (this.voiceVolume > 0) {
-      const randomIdx = Math.floor(Math.random() * 3) + 1;
-      const mp3Path = `/audio/correct/correct_0${randomIdx}.mp3`;
-      this.playMp3File(mp3Path, 'feedback-correct', this.voiceVolume);
-    }
-  }
-
-  // Play gentle error boop sound + Persian encouraging voice
-  playWrongSound() {
-    if (!this.soundEnabled) return;
-
-    // 1. Play error tone
-    try {
-      const ctx = this.getContext();
-      if (ctx && this.sfxVolume > 0) {
-        const now = ctx.currentTime;
+      // Dual harmonic bell frequencies (C6 + E6)
+      [1046.5, 1318.51].forEach((freq) => {
         const osc = ctx.createOscillator();
         const gain = ctx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(freq, now);
 
-        osc.type = 'sawtooth';
-        osc.frequency.setValueAtTime(220, now);
-        osc.frequency.exponentialRampToValueAtTime(110, now + 0.2);
-
-        const vol = 0.15 * this.sfxVolume;
-        gain.gain.setValueAtTime(vol, now);
-        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.2);
+        const vol = 0.16 * this.sfxVolume;
+        gain.gain.setValueAtTime(0, now);
+        gain.gain.linearRampToValueAtTime(vol, now + 0.015);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.18);
 
         osc.connect(gain);
         gain.connect(ctx.destination);
 
         osc.start(now);
         osc.stop(now + 0.2);
-      }
+      });
     } catch {
       // Ignore
     }
-
-    // 2. Play encouraging spoken phrase
-    if (this.voiceVolume > 0) {
-      const randomIdx = Math.floor(Math.random() * 3) + 1;
-      const mp3Path = `/audio/wrong/wrong_0${randomIdx}.mp3`;
-      this.playMp3File(mp3Path, 'feedback-wrong', this.voiceVolume);
-    }
   }
 
-  // Play fan fare for streak
-  playStreakSound() {
-    if (!this.soundEnabled) return;
+  // 2. ✨ Short, Clean Correct Answer Sound (Triad Arpeggio)
+  public playCorrectSound() {
+    if (!this.soundEnabled || this.sfxVolume <= 0) return;
     try {
       const ctx = this.getContext();
-      if (ctx && this.sfxVolume > 0) {
-        const now = ctx.currentTime;
-        const freqs = [523.25, 659.25, 783.99, 1046.50, 1318.51];
-        freqs.forEach((f, i) => {
-          const osc = ctx.createOscillator();
-          const gain = ctx.createGain();
-          osc.type = 'sine';
-          osc.frequency.setValueAtTime(f, now + i * 0.08);
+      if (!ctx) return;
+      const now = ctx.currentTime;
+      const notes = [523.25, 659.25, 783.99, 1046.5]; // C5, E5, G5, C6
 
-          const vol = 0.25 * this.sfxVolume;
-          gain.gain.setValueAtTime(vol, now + i * 0.08);
-          gain.gain.exponentialRampToValueAtTime(0.001, now + i * 0.08 + 0.35);
+      notes.forEach((freq, idx) => {
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(freq, now + idx * 0.045);
 
-          osc.connect(gain);
-          gain.connect(ctx.destination);
+        const vol = 0.18 * this.sfxVolume;
+        gain.gain.setValueAtTime(0, now + idx * 0.045);
+        gain.gain.linearRampToValueAtTime(vol, now + idx * 0.045 + 0.015);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + idx * 0.045 + 0.22);
 
-          osc.start(now + i * 0.08);
-          osc.stop(now + i * 0.08 + 0.4);
-        });
-      }
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+
+        osc.start(now + idx * 0.045);
+        osc.stop(now + idx * 0.045 + 0.25);
+      });
     } catch {
       // Ignore
     }
   }
 
-  // Play game start sound ("بریم بازی رو شروع کنیم!")
-  playGameStart() {
-    this.playMp3File('/audio/instructions/game_start.mp3', 'game-start', this.voiceVolume);
+  // 3. 🕊️ Soft, Gentle, Neutral Wrong Answer Sound (non-punitive, gentle warm tap)
+  public playWrongSound() {
+    if (!this.soundEnabled || this.sfxVolume <= 0) return;
+    try {
+      const ctx = this.getContext();
+      if (!ctx) return;
+      const now = ctx.currentTime;
+
+      // Soft sine drop with low amplitude
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(240, now);
+      osc.frequency.exponentialRampToValueAtTime(180, now + 0.12);
+
+      const vol = 0.12 * this.sfxVolume;
+      gain.gain.setValueAtTime(0, now);
+      gain.gain.linearRampToValueAtTime(vol, now + 0.01);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.14);
+
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+
+      osc.start(now);
+      osc.stop(now + 0.15);
+    } catch {
+      // Ignore
+    }
   }
 
-  // Play level complete sound ("هورااا! این مرحله با موفقیت تموم شد!")
-  playLevelComplete() {
-    this.playMp3File('/audio/rewards/level_complete.mp3', 'level-complete', this.voiceVolume);
+  // 4. 🎉 Short & Joyful Level / Deck Complete Fanfare (0.35s)
+  public playLevelComplete() {
+    if (!this.soundEnabled || this.sfxVolume <= 0) return;
+    try {
+      const ctx = this.getContext();
+      if (!ctx) return;
+      const now = ctx.currentTime;
+      const freqs = [523.25, 659.25, 783.99, 1046.5, 1318.51]; // C5, E5, G5, C6, E6
+
+      freqs.forEach((f, i) => {
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(f, now + i * 0.06);
+
+        const vol = 0.2 * this.sfxVolume;
+        gain.gain.setValueAtTime(0, now + i * 0.06);
+        gain.gain.linearRampToValueAtTime(vol, now + i * 0.06 + 0.02);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + i * 0.06 + 0.3);
+
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+
+        osc.start(now + i * 0.06);
+        osc.stop(now + i * 0.06 + 0.35);
+      });
+    } catch {
+      // Ignore
+    }
   }
 
-  // Play reward star sound ("تبریک می‌گم! یک ستاره‌ی طلایی جدید گرفتی!")
-  playRewardStar() {
-    this.playMp3File('/audio/rewards/reward_star.mp3', 'reward-star', this.voiceVolume);
+  // 5. 🏆 Grand 36-Cards & Major Achievement Celebration Chime (0.6s)
+  public playCelebrationSound() {
+    if (!this.soundEnabled || this.sfxVolume <= 0) return;
+    try {
+      const ctx = this.getContext();
+      if (!ctx) return;
+      const now = ctx.currentTime;
+      const melody = [
+        { f: 523.25, t: 0.0 },   // C5
+        { f: 659.25, t: 0.08 },  // E5
+        { f: 783.99, t: 0.16 },  // G5
+        { f: 1046.5, t: 0.24 },  // C6
+        { f: 1318.51, t: 0.32 }, // E6
+        { f: 1567.98, t: 0.40 }, // G6
+      ];
+
+      melody.forEach(({ f, t }) => {
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(f, now + t);
+
+        const vol = 0.22 * this.sfxVolume;
+        gain.gain.setValueAtTime(0, now + t);
+        gain.gain.linearRampToValueAtTime(vol, now + t + 0.02);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + t + 0.35);
+
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+
+        osc.start(now + t);
+        osc.stop(now + t + 0.4);
+      });
+    } catch {
+      // Ignore
+    }
   }
 
-  // Play badge unlock sound ("مدال جدید باز شد! آفرین به تو قهرمان!")
-  playRewardBadge() {
-    this.playMp3File('/audio/rewards/reward_badge.mp3', 'reward-badge', this.voiceVolume);
+  // 6. ⚡ Streak Fanfare
+  public playStreakSound() {
+    this.playLevelComplete();
   }
 
-  // Play local MP3 audio for table row (e.g. 2x3 -> 2-3.mp3)
+  public playGameStart() {
+    this.playDing();
+  }
+
+  public playRewardStar() {
+    this.playDing();
+  }
+
+  public playRewardBadge() {
+    this.playLevelComplete();
+  }
+
+  // 🎓 Authentic Multiplication Table Narrator (strictly for educational tables in LearnView & ConceptView)
   public speakTraditionalMultiplication(f1: number, f2: number, id?: string): void {
     const audioId = id || `table-mult-${f1}-${f2}`;
     const mp3Path = `/audio/multiplication/${f1}-${f2}.mp3`;
     this.playMp3File(mp3Path, audioId, this.voiceVolume);
   }
 
-  // Speak Persian text or play mapped audio file
   public speakPersian(text: string, id: string = 'global-speech'): void {
-    this.playMp3File('/audio/instructions/game_start.mp3', id, this.voiceVolume);
+    // If not multiplication audio, stop or do soft ding
+    this.playDing();
   }
 }
 
@@ -459,10 +493,12 @@ export function useAudioState() {
     speakPersian: (text: string, id?: string) => sounds.speakPersian(text, id),
     speakTraditionalMultiplication: (f1: number, f2: number, id?: string) =>
       sounds.speakTraditionalMultiplication(f1, f2, id),
+    playDing: () => sounds.playDing(),
     playCorrectSound: () => sounds.playCorrectSound(),
     playWrongSound: () => sounds.playWrongSound(),
     playGameStart: () => sounds.playGameStart(),
     playLevelComplete: () => sounds.playLevelComplete(),
+    playCelebrationSound: () => sounds.playCelebrationSound(),
     playRewardStar: () => sounds.playRewardStar(),
     playRewardBadge: () => sounds.playRewardBadge(),
     preloadKeyAudio: () => sounds.preloadKeyAudio(),

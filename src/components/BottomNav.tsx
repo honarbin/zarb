@@ -1,5 +1,5 @@
 import React from 'react';
-import { Target, BookOpen, Zap, User, Sparkles, Lightbulb } from 'lucide-react';
+import { Target, BookOpen, Zap, User, Sparkles, Lightbulb, Layers } from 'lucide-react';
 import { AppView } from '../types';
 
 interface BottomNavProps {
@@ -20,6 +20,12 @@ export const BottomNav: React.FC<BottomNavProps> = ({ currentView, onNavigate })
       label: 'ترفندخانه',
       icon: <Lightbulb className="w-5 h-5 text-purple-500" />,
       color: 'from-purple-500 to-indigo-500',
+    },
+    {
+      id: 'summary',
+      label: 'خلاصه ضرب‌ها',
+      icon: <Layers className="w-5 h-5 text-emerald-600" />,
+      color: 'from-emerald-500 to-teal-600',
     },
     {
       id: 'practice',

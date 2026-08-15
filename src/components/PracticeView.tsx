@@ -71,19 +71,52 @@ export const PracticeView: React.FC<PracticeViewProps> = ({ stats, onUpdateStats
     let points = 0;
     let newStreak = currentStreak;
 
+    // Encouraging messages pools
+    const positiveMessages = [
+      'آفرین! 👏',
+      'عالی بود! ⭐',
+      'درست گفتی! 🚀',
+      'فوق‌العاده‌ای! 🌟',
+      'هورا! درست شد! 🎉',
+      'هوشمندانه بود! 💡',
+      'ماشالله قهرمان! ✨',
+    ];
+
+    const learningMessages = [
+      'اشکالی نداره! این ضرب رو با هم یاد می‌گیریم 🌱',
+      'تلاش خیلی خوبی بود! دفعه بعد حتماً موفق می‌شی 💪',
+      'تمرین بیشتر یعنی مهارت بیشتر! 💡',
+      'با همدیگه دوباره تمرینش می‌کنیم ⭐',
+    ];
+
     if (isCorrect) {
-      points += 10; // Base score
-      if (answerTimeSeconds < 3.0) {
+      points += 10; // Base score (Always positive, never deducted)
+      if (answerTimeSeconds < 3.5) {
         points += 5; // Speed bonus
       }
 
       newStreak += 1;
-      if (newStreak === 5) {
-        points += 20; // 5 streak bonus
+      let feedbackMsg = positiveMessages[Math.floor(Math.random() * positiveMessages.length)];
+
+      if (newStreak === 3) {
+        feedbackMsg = `زنجیره ۳تایی! عالی پیش می‌ری! ⚡`;
+        points += 10;
+        if (soundEnabled) sounds.playStreakSound();
+      } else if (newStreak === 5) {
+        feedbackMsg = `زنجیره ۵تایی طلایی! شگفت‌انگیزی! 🌟🔥`;
+        points += 25;
+        if (soundEnabled) sounds.playStreakSound();
+      } else if (newStreak === 7) {
+        feedbackMsg = `زنجیره ۷تایی رویایی! نابغه‌ای! 🚀✨`;
+        points += 35;
         if (soundEnabled) sounds.playStreakSound();
       } else if (newStreak === 10) {
-        points += 50; // 10 streak bonus
+        feedbackMsg = `زنجیره ۱۰تایی کامل! تو قهرمان واقعی ضربی! 👑🎉`;
+        points += 60;
         if (soundEnabled) sounds.playStreakSound();
+      } else if (newStreak > 1) {
+        feedbackMsg = `${positiveMessages[Math.floor(Math.random() * positiveMessages.length)]} (زنجیره ${toPersianDigits(newStreak)} 🔥)`;
+        if (soundEnabled) sounds.playCorrectSound();
       } else {
         if (soundEnabled) sounds.playCorrectSound();
       }
@@ -96,16 +129,16 @@ export const PracticeView: React.FC<PracticeViewProps> = ({ stats, onUpdateStats
 
       setFeedback({
         isCorrect: true,
-        message: 'آفرین! درست جواب دادی 🎉',
+        message: feedbackMsg,
         pointsEarned: points,
       });
 
-      // Launch small confetti burst for correct answer
+      // Launch small celebratory confetti burst for correct answer
       confetti({
-        particleCount: 25,
-        spread: 60,
+        particleCount: newStreak >= 3 ? 40 : 25,
+        spread: 65,
         origin: { y: 0.7 },
-        colors: ['#34d399', '#fbbf24', '#f472b6'],
+        colors: ['#34d399', '#fbbf24', '#f472b6', '#38bdf8'],
       });
 
     } else {
@@ -114,9 +147,11 @@ export const PracticeView: React.FC<PracticeViewProps> = ({ stats, onUpdateStats
       setWrongCount((prev) => prev + 1);
       if (soundEnabled) sounds.playWrongSound();
 
+      const supportiveMsg = learningMessages[Math.floor(Math.random() * learningMessages.length)];
+
       setFeedback({
         isCorrect: false,
-        message: 'اشکالی نداره! دوباره تلاش کن 💪',
+        message: supportiveMsg,
         pointsEarned: 0,
       });
     }
@@ -473,8 +508,10 @@ export const PracticeView: React.FC<PracticeViewProps> = ({ stats, onUpdateStats
             expression={
               isAnswered
                 ? feedback?.isCorrect
-                  ? 'correct'
-                  : 'wrong'
+                  ? currentStreak >= 3
+                    ? 'celebration'
+                    : 'correct'
+                  : 'thinking'
                 : selectedOption !== null
                 ? 'thinking'
                 : 'idle'

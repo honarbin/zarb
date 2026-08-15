@@ -273,59 +273,107 @@ export const GameCharacter: React.FC<GameCharacterProps> = ({
   const renderGlasses = () => {
     if (glasses === 'none') return null;
 
+    // Character-specific alignment config so glasses sit naturally on each character's eyes
+    const charConfig: Record<CharacterId, { yPos: number; scale: number }> = {
+      robot: { yPos: 31, scale: 0.92 },
+      fox: { yPos: 30, scale: 0.95 },
+      panda: { yPos: 32, scale: 0.94 },
+      cat: { yPos: 28.5, scale: 0.98 },
+    };
+
+    const cfg = charConfig[characterId] || { yPos: 30, scale: 0.95 };
+
     if (glasses === 'cool') {
       return (
-        <g id="accessory-glasses-cool" style={{ transform: 'translate(0px, 12px)' }}>
+        <g
+          id="accessory-glasses-cool"
+          style={{
+            transform: `translate(50px, ${cfg.yPos}px) scale(${cfg.scale})`,
+            transformOrigin: '0px 0px',
+          }}
+        >
           <defs>
             <linearGradient id="cool-lens" x1="0%" y1="0%" x2="0%" y2="100%">
               <stop offset="0%" stopColor="#1e293b" />
-              <stop offset="40%" stopColor="#0f172a" />
+              <stop offset="50%" stopColor="#0f172a" />
               <stop offset="100%" stopColor="#020617" />
             </linearGradient>
             <linearGradient id="neon-rim" x1="0%" y1="0%" x2="100%" y2="0%">
-              <stop offset="0%" stopColor="#d946ef" />
+              <stop offset="0%" stopColor="#ec4899" />
               <stop offset="50%" stopColor="#a855f7" />
               <stop offset="100%" stopColor="#6366f1" />
             </linearGradient>
           </defs>
-          {/* Sunglasses Frames with Neon Glowing style */}
-          <rect x="15" y="32" width="31" height="18" rx="8" fill="url(#cool-lens)" stroke="url(#neon-rim)" strokeWidth="3" />
-          <rect x="54" y="32" width="31" height="18" rx="8" fill="url(#cool-lens)" stroke="url(#neon-rim)" strokeWidth="3" />
+
+          {/* Left Lens Frame */}
+          <rect
+            x="-22.5"
+            y="-6.5"
+            width="18"
+            height="13"
+            rx="4"
+            fill="url(#cool-lens)"
+            stroke="url(#neon-rim)"
+            strokeWidth="2"
+          />
+          {/* Right Lens Frame */}
+          <rect
+            x="4.5"
+            y="-6.5"
+            width="18"
+            height="13"
+            rx="4"
+            fill="url(#cool-lens)"
+            stroke="url(#neon-rim)"
+            strokeWidth="2"
+          />
           {/* Bridge */}
-          <rect x="44" y="37" width="12" height="4" rx="1" fill="#a855f7" />
+          <rect x="-4.5" y="-2" width="9" height="3" rx="1.2" fill="#a855f7" />
+
+          {/* Temple arms */}
+          <path d="M -22.5 -1.5 Q -25.5 -1.5, -28.5 0.5" fill="none" stroke="#a855f7" strokeWidth="1.8" strokeLinecap="round" />
+          <path d="M 22.5 -1.5 Q 25.5 -1.5, 28.5 0.5" fill="none" stroke="#a855f7" strokeWidth="1.8" strokeLinecap="round" />
+
           {/* Glass glare line reflections */}
-          <path d="M 19 36 L 31 46" stroke="#ffffff" strokeWidth="2.5" strokeLinecap="round" opacity="0.4" />
-          <path d="M 33 36 L 37 40" stroke="#ffffff" strokeWidth="1.5" strokeLinecap="round" opacity="0.3" />
-          <path d="M 58 36 L 70 46" stroke="#ffffff" strokeWidth="2.5" strokeLinecap="round" opacity="0.4" />
-          <path d="M 72 36 L 76 40" stroke="#ffffff" strokeWidth="1.5" strokeLinecap="round" opacity="0.3" />
+          <path d="M -20 -3.5 L -13 4" stroke="#ffffff" strokeWidth="1.5" strokeLinecap="round" opacity="0.45" />
+          <path d="M -9.5 -3.5 L -7 -0.5" stroke="#ffffff" strokeWidth="1.2" strokeLinecap="round" opacity="0.35" />
+          <path d="M 7 -3.5 L 14 4" stroke="#ffffff" strokeWidth="1.5" strokeLinecap="round" opacity="0.45" />
+          <path d="M 17.5 -3.5 L 20 -0.5" stroke="#ffffff" strokeWidth="1.2" strokeLinecap="round" opacity="0.35" />
         </g>
       );
     }
 
     if (glasses === 'smart') {
       return (
-        <g id="accessory-glasses-smart" style={{ transform: 'translate(0px, 10px)' }}>
+        <g
+          id="accessory-glasses-smart"
+          style={{
+            transform: `translate(50px, ${cfg.yPos}px) scale(${cfg.scale})`,
+            transformOrigin: '0px 0px',
+          }}
+        >
           <defs>
             <linearGradient id="lens-blue-glow" x1="0%" y1="0%" x2="0%" y2="100%">
-              <stop offset="0%" stopColor="#e0f2fe" stopOpacity="0.4" />
-              <stop offset="100%" stopColor="#bae6fd" stopOpacity="0.1" />
+              <stop offset="0%" stopColor="#e0f2fe" stopOpacity="0.45" />
+              <stop offset="100%" stopColor="#bae6fd" stopOpacity="0.15" />
             </linearGradient>
           </defs>
-          {/* Intelligent/Scientific Round Golden Glasses */}
-          {/* Lenses */}
-          <circle cx="31" cy="42" r="14" fill="url(#lens-blue-glow)" />
-          <circle cx="69" cy="42" r="14" fill="url(" />
-          {/* Gold Rims */}
-          <circle cx="31" cy="42" r="14" fill="none" stroke="#eab308" strokeWidth="3" />
-          <circle cx="69" cy="42" r="14" fill="none" stroke="#eab308" strokeWidth="3" strokeContent="transparent" />
+
+          {/* Left Lens */}
+          <circle cx="-14.5" cy="0" r="7.5" fill="url(#lens-blue-glow)" stroke="#eab308" strokeWidth="2" />
+          {/* Right Lens */}
+          <circle cx="14.5" cy="0" r="7.5" fill="url(#lens-blue-glow)" stroke="#eab308" strokeWidth="2" />
+
           {/* Bridge */}
-          <path d="M 45 40 Q 50 37, 55 40" fill="none" stroke="#eab308" strokeWidth="3.5" strokeLinecap="round" />
+          <path d="M -7 -1.5 Q 0 -4.5, 7 -1.5" fill="none" stroke="#ca8a04" strokeWidth="2.2" strokeLinecap="round" />
+
           {/* Temple arms */}
-          <path d="M 17 40 Q 11 36 7 42" fill="none" stroke="#ca8a04" strokeWidth="2" strokeLinecap="round" />
-          <path d="M 83 40 Q 89 36 93 42" fill="none" stroke="#ca8a04" strokeWidth="2" strokeLinecap="round" />
-          {/* Glass Sparkle Glare */}
-          <path d="M 23 35 Q 35 44 35 44" fill="none" stroke="#ffffff" strokeWidth="2.5" strokeLinecap="round" opacity="0.6" />
-          <path d="M 61 35 Q 73 44 73 44" fill="none" stroke="#ffffff" strokeWidth="2.5" strokeLinecap="round" opacity="0.6" />
+          <path d="M -22 -0.5 Q -25.5 -0.5, -28.5 1.5" fill="none" stroke="#ca8a04" strokeWidth="1.6" strokeLinecap="round" />
+          <path d="M 22 -0.5 Q 25.5 -0.5, 28.5 1.5" fill="none" stroke="#ca8a04" strokeWidth="1.6" strokeLinecap="round" />
+
+          {/* Glass Sparkle Glare Arc */}
+          <path d="M -18.5 -3 Q -14 -6, -11 -2" fill="none" stroke="#ffffff" strokeWidth="1.5" strokeLinecap="round" opacity="0.75" />
+          <path d="M 10.5 -3 Q 15 -6, 18 -2" fill="none" stroke="#ffffff" strokeWidth="1.5" strokeLinecap="round" opacity="0.75" />
         </g>
       );
     }

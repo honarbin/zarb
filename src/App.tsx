@@ -16,6 +16,7 @@ import { TricksView } from './components/TricksView';
 import { SpeedChallengeView } from './components/SpeedChallengeView';
 import { RecordsView } from './components/RecordsView';
 import { ProfileView } from './components/ProfileView';
+import { SummaryView } from './components/SummaryView';
 import { AudioDiagnosticPanel } from './components/AudioDiagnosticPanel';
 
 export default function App() {
@@ -27,6 +28,7 @@ export default function App() {
   const [viewKeys, setViewKeys] = useState<Record<AppView, number>>({
     concept: 0,
     tricks: 0,
+    summary: 0,
     practice: 0,
     learn: 0,
     speed: 0,
@@ -118,6 +120,15 @@ export default function App() {
           />
         )}
 
+        {currentView === 'summary' && (
+          <SummaryView
+            key={`summary-${viewKeys.summary}`}
+            stats={userStats}
+            onStartPractice={() => handleNavigate('practice')}
+            onNavigateToLearn={() => handleNavigate('learn')}
+          />
+        )}
+
         {currentView === 'practice' && (
           <PracticeView
             key={`practice-${viewKeys.practice}`}
@@ -130,6 +141,7 @@ export default function App() {
         {currentView === 'learn' && (
           <LearnView
             key={`learn-${viewKeys.learn}`}
+            stats={userStats}
             onStartTablePractice={handleStartTablePractice}
             onNavigateToConcept={() => handleNavigate('concept')}
           />
@@ -148,6 +160,9 @@ export default function App() {
           <RecordsView
             key={`records-${viewKeys.records}`}
             stats={userStats}
+            onStartTablePractice={handleStartTablePractice}
+            onNavigateToSpeed={() => handleNavigate('speed')}
+            onNavigateToPractice={() => handleNavigate('practice')}
           />
         )}
 
@@ -157,6 +172,7 @@ export default function App() {
             stats={userStats}
             onUpdateStats={handleUpdateStats}
             onStartFocusedPractice={handleStartWeaknessPractice}
+            onNavigateToRecords={() => handleNavigate('records')}
           />
         )}
       </main>

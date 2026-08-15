@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { User, Award, BrainCircuit, Edit2, Check, Sparkles, AlertCircle, Play, ShieldAlert, Award as AwardIcon } from 'lucide-react';
+import { User, Award, BrainCircuit, Edit2, Check, Sparkles, AlertCircle, Play, ShieldAlert, Award as AwardIcon, GraduationCap, ChevronLeft } from 'lucide-react';
 import { UserStats, Badge, DifficultyLevel } from '../types';
 import { toPersianDigits, sounds } from '../utils/persian';
 import { MathFormula } from './MathFormula';
@@ -10,6 +10,7 @@ interface ProfileViewProps {
   stats: UserStats;
   onUpdateStats: (newStats: UserStats) => void;
   onStartFocusedPractice: () => void;
+  onNavigateToRecords?: () => void;
 }
 
 const HATS_W_REQUIREMENTS = [
@@ -35,6 +36,7 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
   stats,
   onUpdateStats,
   onStartFocusedPractice,
+  onNavigateToRecords,
 }) => {
   const [isEditingName, setIsEditingName] = useState<boolean>(false);
   const [nameInput, setNameInput] = useState<string>(stats.username || 'قهرمان کوچک');
@@ -102,7 +104,7 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
           <div 
             onClick={handleInteractiveClick}
             className="w-32 h-32 rounded-full bg-white/25 flex items-center justify-center shadow-lg border-4 border-white/60 cursor-pointer hover:scale-105 active:scale-95 transition-all p-3 relative"
-            title="برای حرکت دادن من لمس کن!"
+            title="قهرمانت رو انتخاب کن"
           >
             <GameCharacter
               characterId={(stats.avatar as any) || 'fox'}
@@ -113,7 +115,7 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
               accessory={stats.selectedAccessory}
             />
             <div className="absolute -bottom-1 -right-1 bg-amber-400 text-slate-950 font-black text-[10px] px-2.5 py-1 rounded-full border border-amber-200 animate-bounce">
-              لمسم کن! 👇
+              قهرمانت رو انتخاب کن ✨
             </div>
           </div>
 
@@ -154,6 +156,36 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
         </div>
 
       </div>
+
+      {/* Parent Progress Report Link Card */}
+      {onNavigateToRecords && (
+        <div className="bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 text-white rounded-3xl p-4 sm:p-5 shadow-md border-2 border-indigo-500/30 flex items-center justify-between gap-3">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-2xl bg-indigo-500/20 border border-indigo-400/30 flex items-center justify-center text-amber-300 shrink-0">
+              <GraduationCap className="w-6 h-6" />
+            </div>
+            <div className="text-right">
+              <h3 className="font-black text-sm text-white flex items-center gap-1.5">
+                <span>گزارش و پیشرفت تحصیلی</span>
+                <span className="text-[10px] bg-amber-400 text-slate-950 font-bold px-2 py-0.5 rounded-full">
+                  ویژه والدین
+                </span>
+              </h3>
+              <p className="text-[11px] text-slate-300 font-medium mt-0.5">
+                مشاهده تحلیل جدول‌ها، مرور اشتباهات و آمار دقیق یادگیری
+              </p>
+            </div>
+          </div>
+
+          <button
+            onClick={onNavigateToRecords}
+            className="shrink-0 bg-white hover:bg-amber-100 text-slate-900 font-black text-xs px-3.5 py-2 rounded-xl transition-all shadow-xs flex items-center gap-1 cursor-pointer active:scale-95"
+          >
+            <span>مشاهده گزارش</span>
+            <ChevronLeft className="w-4 h-4" />
+          </button>
+        </div>
+      )}
 
       {/* 1. Character Selector Section (Cards Grid) */}
       <div className="space-y-4">
