@@ -122,9 +122,6 @@ export const RecordsView: React.FC<RecordsViewProps> = ({
               characterId={(stats.avatar as any) || 'fox'}
               expression="celebration"
               size="md"
-              hat={stats.selectedHat}
-              glasses={stats.selectedGlasses}
-              accessory={stats.selectedAccessory}
             />
           </div>
         </div>

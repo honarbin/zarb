@@ -18,6 +18,11 @@ import {
   Star,
   CheckCircle,
   HelpCircle,
+  Timer,
+  SlidersHorizontal,
+  ChevronRight,
+  Smile,
+  ShieldCheck,
 } from 'lucide-react';
 import { UserStats, Question } from '../types';
 import { toPersianDigits, sounds } from '../utils/persian';
@@ -38,21 +43,47 @@ export interface SpeedMistake {
   correctAnswer: number;
 }
 
+export type ChallengeMode = 'timed' | 'untimed';
+
 interface SpeedChallengeProps {
   stats: UserStats;
+  initialTable?: number | null;
   onUpdateStats: (newStats: UserStats) => void;
   onBackToMenu: () => void;
 }
 
-const POSITIVE_MESSAGES = ['آفرین! 👏', 'عالی بود! ⭐', 'درست گفتی! 🚀', 'فوق‌العاده! 🌟', 'بی‌نظیر! 🔥'];
+const POSITIVE_MESSAGES = [
+  'آفرین! 👏',
+  'عالی بود! ⭐',
+  'درست گفتی! 🚀',
+  'فوق‌العاده! 🌟',
+  'بی‌نظیر! 🔥',
+  'ماشالله قهرمان! ✨',
+];
 
 export const SpeedChallengeView: React.FC<SpeedChallengeProps> = ({
   stats,
+  initialTable,
   onUpdateStats,
   onBackToMenu,
 }) => {
+  // Mode Settings
+  const [challengeMode, setChallengeMode] = useState<ChallengeMode>('timed');
+  const [timeDuration, setTimeDuration] = useState<number>(60); // 30, 60, 90 seconds
+  const [untimedQuestionCount, setUntimedQuestionCount] = useState<number>(10); // 10, 15, 20, 30 questions
+
+  // Selected tables for challenge: default to initialTable if provided, else 1 to 10
+  const [selectedTables, setSelectedTables] = useState<number[]>(() => {
+    if (initialTable && initialTable >= 1 && initialTable <= 10) {
+      return [initialTable];
+    }
+    return [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+  });
+
+  // Game Flow States
   const [isPlaying, setIsPlaying] = useState<boolean>(false);
   const [timeLeft, setTimeLeft] = useState<number>(60);
+  const [elapsedTime, setElapsedTime] = useState<number>(0);
   const [questionIndex, setQuestionIndex] = useState<number>(0);
   const [currentQuestion, setCurrentQuestion] = useState<Question | null>(null);
   const [score, setScore] = useState<number>(0);
@@ -70,7 +101,7 @@ export const SpeedChallengeView: React.FC<SpeedChallengeProps> = ({
     message: string;
   } | null>(null);
 
-  // List of mistakes recorded during the speed challenge
+  // List of mistakes recorded during this session
   const [mistakes, setMistakes] = useState<SpeedMistake[]>([]);
 
   // Retry mistakes practice mode state
@@ -83,13 +114,9 @@ export const SpeedChallengeView: React.FC<SpeedChallengeProps> = ({
   } | null>(null);
   const [reviewCompleted, setReviewCompleted] = useState<boolean>(false);
 
-  // Selected tables for speed challenge: default all 1 to 10
-  const [selectedTables, setSelectedTables] = useState<number[]>([
-    1, 2, 3, 4, 5, 6, 7, 8, 9, 10,
-  ]);
-
   const soundEnabled = stats.soundEnabled;
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const gameStartTimeRef = useRef<number>(0);
 
   // Cleanup timeout on unmount
   useEffect(() => {
@@ -100,6 +127,7 @@ export const SpeedChallengeView: React.FC<SpeedChallengeProps> = ({
 
   // Toggle table selection
   const handleToggleTable = (num: number) => {
+    sounds.playDing();
     if (selectedTables.includes(num)) {
       if (selectedTables.length > 1) {
         setSelectedTables(selectedTables.filter((t) => t !== num));
@@ -111,10 +139,17 @@ export const SpeedChallengeView: React.FC<SpeedChallengeProps> = ({
 
   // Preset selectors
   const handleSelectAll = () => {
+    sounds.playDing();
     setSelectedTables([1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
   };
 
+  const handleSelectOnlyInitial = (num: number) => {
+    sounds.playDing();
+    setSelectedTables([num]);
+  };
+
   const handleSelectRange = (from: number, to: number) => {
+    sounds.playDing();
     const range: number[] = [];
     for (let i = from; i <= to; i++) range.push(i);
     setSelectedTables(range);
@@ -130,28 +165,40 @@ export const SpeedChallengeView: React.FC<SpeedChallengeProps> = ({
     return `جدول‌های ${selectedTables.map((t) => toPersianDigits(t)).join('، ')}`;
   };
 
-  // Countdown Timer Hook
+  // Countdown & Elapsed Timer Hook
   useEffect(() => {
     let timer: NodeJS.Timeout;
-    if (isPlaying && timeLeft > 0 && !isFinished) {
+    if (isPlaying && !isFinished) {
       timer = setInterval(() => {
-        setTimeLeft((prev) => {
-          if (prev <= 1) {
-            handleFinishGame();
-            return 0;
-          }
-          return prev - 1;
-        });
+        if (challengeMode === 'timed') {
+          setTimeLeft((prev) => {
+            if (prev <= 1) {
+              return 0;
+            }
+            return prev - 1;
+          });
+        } else {
+          setElapsedTime((prev) => prev + 1);
+        }
       }, 1000);
     }
     return () => clearInterval(timer);
-  }, [isPlaying, timeLeft, isFinished]);
+  }, [isPlaying, challengeMode, isFinished]);
 
-  // Start Speed Challenge
+  // When timer hits 0 in timed mode, safely trigger game finish
+  useEffect(() => {
+    if (isPlaying && !isFinished && challengeMode === 'timed' && timeLeft === 0) {
+      handleFinishGame();
+    }
+  }, [timeLeft, isPlaying, isFinished, challengeMode]);
+
+  // Start Speed Challenge / Untimed Practice
   const startGame = () => {
     if (timeoutRef.current) clearTimeout(timeoutRef.current);
+    sounds.playDing();
     setIsPlaying(true);
-    setTimeLeft(60);
+    setTimeLeft(timeDuration);
+    setElapsedTime(0);
     setQuestionIndex(0);
     setScore(0);
     setCorrectCount(0);
@@ -163,12 +210,13 @@ export const SpeedChallengeView: React.FC<SpeedChallengeProps> = ({
     setMistakes([]);
     setIsReviewingMistakes(false);
     setReviewCompleted(false);
+    gameStartTimeRef.current = Date.now();
 
     const firstQ = generateQuestion('hard', stats, selectedTables);
     setCurrentQuestion(firstQ);
   };
 
-  // Handle Answer Choice in Speed Game
+  // Handle Answer Choice
   const handleAnswer = (option: number) => {
     if (!isPlaying || isFinished || !currentQuestion || feedback) return;
 
@@ -214,7 +262,7 @@ export const SpeedChallengeView: React.FC<SpeedChallengeProps> = ({
       });
     }
 
-    // Update table accuracy stats (connects directly to smart review weaknesses)
+    // Update table accuracy stats (connects directly to overall progress)
     const updatedUserStats = recordQuestionResult(
       stats,
       currentQuestion.factor1,
@@ -228,17 +276,22 @@ export const SpeedChallengeView: React.FC<SpeedChallengeProps> = ({
 
     timeoutRef.current = setTimeout(() => {
       setFeedback(null);
-      if (questionIndex + 1 >= 30) {
+      const nextIndex = questionIndex + 1;
+
+      // Check max questions limit depending on mode
+      const maxQ = challengeMode === 'untimed' ? untimedQuestionCount : 30;
+
+      if (nextIndex >= maxQ) {
         handleFinishGame();
       } else {
-        setQuestionIndex((prev) => prev + 1);
+        setQuestionIndex(nextIndex);
         const nextQ = generateQuestion('hard', stats, selectedTables);
         setCurrentQuestion(nextQ);
       }
     }, transitionDelay);
   };
 
-  // Finish Speed Challenge
+  // Finish Speed Challenge / Practice
   const handleFinishGame = () => {
     if (timeoutRef.current) clearTimeout(timeoutRef.current);
     setIsFinished(true);
@@ -254,7 +307,7 @@ export const SpeedChallengeView: React.FC<SpeedChallengeProps> = ({
     // Save records
     let newStats: UserStats = {
       ...stats,
-      bestSpeedScore: Math.max(stats.bestSpeedScore, score),
+      bestSpeedScore: challengeMode === 'timed' ? Math.max(stats.bestSpeedScore, score) : stats.bestSpeedScore,
       totalScore: stats.totalScore + score,
       highScore: Math.max(stats.highScore, stats.totalScore + score),
       maxStreak: Math.max(stats.maxStreak, maxCombo),
@@ -268,7 +321,7 @@ export const SpeedChallengeView: React.FC<SpeedChallengeProps> = ({
   // Start Retry Mistakes Practice Mode
   const handleStartReviewPractice = () => {
     if (mistakes.length === 0) return;
-    // Shuffle the mistakes to avoid static order
+    sounds.playDing();
     const shuffledMistakes = [...mistakes].sort(() => Math.random() - 0.5);
     const questions = shuffledMistakes.map((m) =>
       createQuestionWithChoices(m.factor1, m.factor2)
@@ -296,7 +349,7 @@ export const SpeedChallengeView: React.FC<SpeedChallengeProps> = ({
       setReviewFeedback({ isCorrect: false, selectedOption: option });
     }
 
-    // Also update stats so practice counts towards learning
+    // Update stats
     const updated = recordQuestionResult(stats, currentQ.factor1, currentQ.factor2, isCorrect);
     onUpdateStats(updated);
 
@@ -335,9 +388,6 @@ export const SpeedChallengeView: React.FC<SpeedChallengeProps> = ({
                 characterId={(stats.avatar as any) || 'fox'}
                 expression="celebration"
                 size="lg"
-                hat={stats.selectedHat}
-                glasses={stats.selectedGlasses}
-                accessory={stats.selectedAccessory}
               />
             </div>
 
@@ -349,7 +399,7 @@ export const SpeedChallengeView: React.FC<SpeedChallengeProps> = ({
                 همه اشتباه‌ها رو با موفقیت یاد گرفتی! 🎉
               </h2>
               <p className="text-sm font-bold text-slate-500 leading-relaxed">
-                تمام سؤال‌هایی که اشتباه کرده بودی رو با تمرین دوباره مسلط شدی. حالا آماده‌ای تا در مسابقه بعدی رکورد بهتری بزنی!
+                تمام سؤال‌هایی که اشتباه کرده بودی رو با تمرین دوباره مسلط شدی. حالا آماده‌ای تا رکورد بهتری ثبت کنی!
               </p>
             </div>
 
@@ -359,7 +409,7 @@ export const SpeedChallengeView: React.FC<SpeedChallengeProps> = ({
                 className="flex-1 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white font-black py-4 px-4 rounded-2xl shadow-lg border-b-4 border-purple-700 flex items-center justify-center gap-2 cursor-pointer active:scale-95 transition-transform"
               >
                 <Zap className="w-5 h-5" />
-                <span>شروع چالش سرعتی جدید</span>
+                <span>شروع دوباره چالش</span>
               </button>
 
               <button
@@ -390,7 +440,7 @@ export const SpeedChallengeView: React.FC<SpeedChallengeProps> = ({
 
           <button
             onClick={() => setIsReviewingMistakes(false)}
-            className="text-xs font-bold text-slate-500 hover:text-slate-700 px-2 py-1"
+            className="text-xs font-bold text-slate-500 hover:text-slate-700 px-2 py-1 cursor-pointer"
           >
             خروج از تمرین
           </button>
@@ -420,9 +470,6 @@ export const SpeedChallengeView: React.FC<SpeedChallengeProps> = ({
                     : 'idle'
                 }
                 size="md"
-                hat={stats.selectedHat}
-                glasses={stats.selectedGlasses}
-                accessory={stats.selectedAccessory}
               />
             </div>
 
@@ -486,37 +533,184 @@ export const SpeedChallengeView: React.FC<SpeedChallengeProps> = ({
   }
 
   // ----------------------------------------------------
-  // VIEW: START SCREEN & TABLE SELECTOR
+  // VIEW: START SCREEN & TABLE/MODE SELECTOR
   // ----------------------------------------------------
   if (!isPlaying && !isFinished) {
+    const isSingleTableMode = selectedTables.length === 1;
+    const singleTableNum = selectedTables[0];
+
     return (
-      <div className="max-w-xl mx-auto px-4 py-6 pb-24 space-y-6">
-        {/* Banner */}
-        <div className="bg-gradient-to-br from-purple-500 via-pink-500 to-rose-500 text-white rounded-3xl p-6 shadow-xl border-4 border-purple-300 relative overflow-hidden space-y-3">
-          <span className="bg-white/20 text-white text-xs font-black px-3 py-1 rounded-full shadow-sm">
-            چالش زمان‌دار ۶۰ ثانیه‌ای
+      <div className="max-w-xl mx-auto px-4 py-6 pb-28 space-y-5 text-right">
+        
+        {/* Navigation & Header */}
+        <div className="flex items-center justify-between">
+          <button
+            onClick={onBackToMenu}
+            className="flex items-center gap-1.5 bg-white hover:bg-slate-100 text-slate-700 font-black text-xs px-3.5 py-2 rounded-2xl border-2 border-slate-200 shadow-xs transition-all cursor-pointer active:scale-95"
+          >
+            <ChevronRight className="w-4 h-4" />
+            <span>بازگشت</span>
+          </button>
+
+          <span className="bg-purple-100 text-purple-800 text-xs font-black px-3 py-1.5 rounded-full border border-purple-200 flex items-center gap-1">
+            <Zap className="w-3.5 h-3.5 text-purple-600" />
+            <span>{isSingleTableMode ? `چالش جدول ${toPersianDigits(singleTableNum)}` : 'چالش سرعتی و تمرین'}</span>
           </span>
-          <h2 className="text-3xl font-black text-white tracking-tight flex items-center gap-2">
-            مسابقه سرعتی! ⚡
+        </div>
+
+        {/* Banner */}
+        <div className="bg-gradient-to-br from-purple-600 via-pink-600 to-rose-500 text-white rounded-3xl p-5 sm:p-6 shadow-xl border-4 border-purple-300 relative overflow-hidden space-y-2.5">
+          <span className="bg-white/20 text-white text-[11px] font-black px-3 py-0.5 rounded-full shadow-xs inline-block">
+            {isSingleTableMode ? `🎯 تمرین اختصاصی جدول ${toPersianDigits(singleTableNum)}` : '⚡ مسابقه سرعتی و تمرین جدول ضرب'}
+          </span>
+          <h2 className="text-2xl sm:text-3xl font-black text-white tracking-tight flex items-center gap-2">
+            {isSingleTableMode
+              ? `تمرین و چالش جدول ${toPersianDigits(singleTableNum)} 🌟`
+              : 'مسابقه و چالش جدول ضرب ⚡'}
           </h2>
-          <p className="text-sm font-medium text-purple-100 leading-relaxed">
-            ۳۰ سؤال در ۶۰ ثانیه! جدول‌های مورد نظرت را انتخاب کن، سریع پاسخ بده و رکورد بزن!
+          <p className="text-xs sm:text-sm font-bold text-purple-100 leading-relaxed">
+            {isSingleTableMode
+              ? `می‌توانی این جدول را به‌صورت سرعتی زمان‌دار یا با آرامش و بدون زمان تمرین کنی!`
+              : 'حالت زمان‌دار رکوردی یا تمرین آرام بدون زمان را انتخاب کن و تسلطت را بسنج!'}
           </p>
         </div>
 
-        {/* Table Selection Panel */}
-        <div className="bg-white rounded-3xl p-5 border-2 border-purple-200 shadow-md space-y-4 text-right">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+        {/* 1. Mode Selector: Timed vs Untimed */}
+        <div className="bg-white rounded-3xl p-5 border-2 border-purple-200 shadow-md space-y-4">
+          <div className="flex items-center gap-2 border-b border-purple-100 pb-2.5">
+            <SlidersHorizontal className="w-4 h-4 text-purple-600" />
+            <h3 className="font-black text-sm text-slate-900">۱. انتخاب نوع چالش (زمان‌دار یا بدون زمان):</h3>
+          </div>
+
+          {/* Mode Tabs */}
+          <div className="grid grid-cols-2 gap-2">
+            <button
+              onClick={() => {
+                setChallengeMode('timed');
+                sounds.playDing();
+              }}
+              className={`p-3.5 rounded-2xl flex flex-col items-center justify-center gap-1.5 border-2 transition-all cursor-pointer active:scale-95 ${
+                challengeMode === 'timed'
+                  ? 'bg-purple-600 text-white border-purple-600 shadow-md ring-2 ring-purple-200'
+                  : 'bg-purple-50/50 hover:bg-purple-50 text-slate-700 border-purple-200'
+              }`}
+            >
+              <div className="flex items-center gap-1.5 font-black text-xs sm:text-sm">
+                <Clock className={`w-4 h-4 ${challengeMode === 'timed' ? 'text-amber-300' : 'text-purple-600'}`} />
+                <span>زمان‌دار (سرعتی رکوردی)</span>
+              </div>
+              <span className={`text-[10px] font-bold ${challengeMode === 'timed' ? 'text-purple-100' : 'text-slate-500'}`}>
+                مسابقه با شمارش معکوس ⏱️
+              </span>
+            </button>
+
+            <button
+              onClick={() => {
+                setChallengeMode('untimed');
+                sounds.playDing();
+              }}
+              className={`p-3.5 rounded-2xl flex flex-col items-center justify-center gap-1.5 border-2 transition-all cursor-pointer active:scale-95 ${
+                challengeMode === 'untimed'
+                  ? 'bg-emerald-600 text-white border-emerald-600 shadow-md ring-2 ring-emerald-200'
+                  : 'bg-emerald-50/50 hover:bg-emerald-50 text-slate-700 border-emerald-200'
+              }`}
+            >
+              <div className="flex items-center gap-1.5 font-black text-xs sm:text-sm">
+                <Smile className={`w-4 h-4 ${challengeMode === 'untimed' ? 'text-amber-300' : 'text-emerald-600'}`} />
+                <span>بدون زمان (تمرین آرام)</span>
+              </div>
+              <span className={`text-[10px] font-bold ${challengeMode === 'untimed' ? 'text-emerald-100' : 'text-slate-500'}`}>
+                تعداد سؤال مشخص بدون استرس 🧘
+              </span>
+            </button>
+          </div>
+
+          {/* Sub-settings based on active mode */}
+          {challengeMode === 'timed' ? (
+            <div className="bg-purple-50/70 p-3.5 rounded-2xl border border-purple-200 space-y-2">
+              <label className="text-xs font-black text-purple-950 flex items-center justify-between">
+                <span>مدت زمان مسابقه:</span>
+                <span className="text-purple-700 bg-white px-2 py-0.5 rounded-lg border border-purple-200 font-black">
+                  {toPersianDigits(timeDuration)} ثانیه
+                </span>
+              </label>
+              <div className="grid grid-cols-3 gap-2">
+                {[
+                  { sec: 30, label: '۳۰ ثانیه ⚡' },
+                  { sec: 60, label: '۶۰ ثانیه (استاندارد) ⭐' },
+                  { sec: 90, label: '۹۰ ثانیه 🏆' },
+                ].map((item) => (
+                  <button
+                    key={item.sec}
+                    onClick={() => {
+                      setTimeDuration(item.sec);
+                      sounds.playDing();
+                    }}
+                    className={`py-2 rounded-xl text-xs font-black border transition-all cursor-pointer ${
+                      timeDuration === item.sec
+                        ? 'bg-purple-600 text-white border-purple-600 shadow-xs'
+                        : 'bg-white text-slate-700 border-slate-200 hover:bg-purple-100/50'
+                    }`}
+                  >
+                    {item.label}
+                  </button>
+                ))}
+              </div>
+              <p className="text-[11px] text-purple-800 font-bold">
+                💡 در مدت زمان انتخاب‌شده، هرچقدر می‌توانی سریع پاسخ بده و کمبوهای طلایی بگیر!
+              </p>
+            </div>
+          ) : (
+            <div className="bg-emerald-50/70 p-3.5 rounded-2xl border border-emerald-200 space-y-2">
+              <label className="text-xs font-black text-emerald-950 flex items-center justify-between">
+                <span>تعداد سؤالات تمرین:</span>
+                <span className="text-emerald-700 bg-white px-2 py-0.5 rounded-lg border border-emerald-200 font-black">
+                  {toPersianDigits(untimedQuestionCount)} سؤال
+                </span>
+              </label>
+              <div className="grid grid-cols-4 gap-1.5">
+                {[
+                  { count: 10, label: '۱۰ سؤال 🌱' },
+                  { count: 15, label: '۱۵ سؤال ⭐' },
+                  { count: 20, label: '۲۰ سؤال 🚀' },
+                  { count: 30, label: '۳۰ سؤال 👑' },
+                ].map((item) => (
+                  <button
+                    key={item.count}
+                    onClick={() => {
+                      setUntimedQuestionCount(item.count);
+                      sounds.playDing();
+                    }}
+                    className={`py-2 rounded-xl text-xs font-black border transition-all cursor-pointer ${
+                      untimedQuestionCount === item.count
+                        ? 'bg-emerald-600 text-white border-emerald-600 shadow-xs'
+                        : 'bg-white text-slate-700 border-slate-200 hover:bg-emerald-100/50'
+                    }`}
+                  >
+                    {item.label}
+                  </button>
+                ))}
+              </div>
+              <p className="text-[11px] text-emerald-800 font-bold">
+                💡 بدون استرس زمان، با آرامش سؤال‌ها را حل کن و دقتت را به ۱۰۰٪ برسان!
+              </p>
+            </div>
+          )}
+        </div>
+
+        {/* 2. Table Selection Panel */}
+        <div className="bg-white rounded-3xl p-5 border-2 border-purple-200 shadow-md space-y-4">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-purple-100 pb-2.5">
             <div className="flex items-center gap-2">
               <div className="w-8 h-8 rounded-xl bg-purple-100 text-purple-600 flex items-center justify-center font-bold">
                 <Grid className="w-5 h-5 text-purple-600" />
               </div>
               <div>
-                <h3 className="font-extrabold text-slate-800 text-base">
-                  انتخاب جدول‌ها برای چالش
+                <h3 className="font-black text-slate-900 text-sm">
+                  ۲. جدول‌های مورد نظر برای چالش:
                 </h3>
-                <p className="text-xs text-slate-500 font-medium">
-                  می‌توانی یک جدول، چند جدول یا همه را انتخاب کنی
+                <p className="text-xs text-slate-500 font-bold">
+                  می‌توانی یک جدول یا ترکیبی از جدول‌ها را انتخاب کنی
                 </p>
               </div>
             </div>
@@ -528,23 +722,36 @@ export const SpeedChallengeView: React.FC<SpeedChallengeProps> = ({
           </div>
 
           {/* Quick Presets */}
-          <div className="flex flex-wrap gap-2 pt-1">
+          <div className="flex flex-wrap gap-1.5">
+            {initialTable && (
+              <button
+                onClick={() => handleSelectOnlyInitial(initialTable)}
+                className={`text-xs font-black px-3 py-1.5 rounded-xl transition-all cursor-pointer ${
+                  selectedTables.length === 1 && selectedTables[0] === initialTable
+                    ? 'bg-purple-600 text-white shadow-xs'
+                    : 'bg-purple-50 text-purple-700 hover:bg-purple-100 border border-purple-200'
+                }`}
+              >
+                🎯 فقط جدول {toPersianDigits(initialTable)}
+              </button>
+            )}
+
             <button
               onClick={handleSelectAll}
               className={`text-xs font-black px-3 py-1.5 rounded-xl transition-all cursor-pointer ${
                 selectedTables.length === 10
-                  ? 'bg-purple-600 text-white shadow-sm ring-2 ring-purple-300'
+                  ? 'bg-purple-600 text-white shadow-xs'
                   : 'bg-slate-100 hover:bg-slate-200 text-slate-700'
               }`}
             >
-              ✨ همه جدول‌ها (۱ تا ۱۰)
+              ✨ همه (۱ تا ۱۰)
             </button>
 
             <button
               onClick={() => handleSelectRange(1, 5)}
               className={`text-xs font-black px-3 py-1.5 rounded-xl transition-all cursor-pointer ${
                 selectedTables.length === 5 && selectedTables.every((t) => t <= 5)
-                  ? 'bg-purple-600 text-white shadow-sm ring-2 ring-purple-300'
+                  ? 'bg-purple-600 text-white shadow-xs'
                   : 'bg-slate-100 hover:bg-slate-200 text-slate-700'
               }`}
             >
@@ -555,7 +762,7 @@ export const SpeedChallengeView: React.FC<SpeedChallengeProps> = ({
               onClick={() => handleSelectRange(6, 10)}
               className={`text-xs font-black px-3 py-1.5 rounded-xl transition-all cursor-pointer ${
                 selectedTables.length === 5 && selectedTables.every((t) => t >= 6)
-                  ? 'bg-purple-600 text-white shadow-sm ring-2 ring-purple-300'
+                  ? 'bg-purple-600 text-white shadow-xs'
                   : 'bg-slate-100 hover:bg-slate-200 text-slate-700'
               }`}
             >
@@ -564,7 +771,7 @@ export const SpeedChallengeView: React.FC<SpeedChallengeProps> = ({
           </div>
 
           {/* Grid of 10 Tables (5 columns) */}
-          <div className="grid grid-cols-5 gap-2 pt-2">
+          <div className="grid grid-cols-5 gap-2 pt-1">
             {Array.from({ length: 10 }, (_, i) => i + 1).map((num) => {
               const isSelected = selectedTables.includes(num);
               return (
@@ -609,45 +816,26 @@ export const SpeedChallengeView: React.FC<SpeedChallengeProps> = ({
           </div>
         </div>
 
-        {/* Rule Summary Cards */}
-        <div className="grid grid-cols-2 gap-3">
-          <div className="bg-white p-4 rounded-2xl border-2 border-purple-200 shadow-sm text-right space-y-1">
-            <span className="text-2xl">⏱️</span>
-            <h3 className="font-extrabold text-sm text-slate-800">زمان محدود</h3>
-            <p className="text-xs text-slate-500">کل مسابقه ۶۰ ثانیه زمان داره</p>
-          </div>
-
-          <div className="bg-white p-4 rounded-2xl border-2 border-purple-200 shadow-sm text-right space-y-1">
-            <span className="text-2xl">🔥</span>
-            <h3 className="font-extrabold text-sm text-slate-800">پاداش کمبو</h3>
-            <p className="text-xs text-slate-500">پاسخ‌های متوالی امتیاز اضافی داره</p>
-          </div>
-        </div>
-
-        {/* Best Record Display */}
-        {stats.bestSpeedScore > 0 && (
-          <div className="bg-purple-100/80 border-2 border-purple-300 rounded-2xl p-4 flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <Trophy className="w-8 h-8 text-purple-600 fill-purple-300" />
-              <div>
-                <p className="text-xs font-extrabold text-purple-900">
-                  بهترین رکورد سرعتی تو:
-                </p>
-                <p className="text-xl font-black text-purple-700">
-                  {toPersianDigits(stats.bestSpeedScore)} امتیاز
-                </p>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Big Start Game Button */}
+        {/* Start Game Button */}
         <button
           onClick={startGame}
-          className="w-full bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white font-black text-xl py-5 rounded-3xl shadow-xl border-b-4 border-purple-700 flex items-center justify-center gap-3 cursor-pointer transition-transform active:scale-95"
+          className={`w-full text-white font-black text-lg sm:text-xl py-4 sm:py-5 rounded-3xl shadow-xl border-b-4 flex items-center justify-center gap-3 cursor-pointer transition-transform active:scale-95 ${
+            challengeMode === 'timed'
+              ? 'bg-gradient-to-r from-purple-500 via-pink-500 to-rose-500 hover:from-purple-600 hover:to-rose-600 border-purple-800'
+              : 'bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 border-emerald-800'
+          }`}
         >
-          <Zap className="w-7 h-7 animate-bounce" />
-          <span>شروع چالش سرعتی</span>
+          {challengeMode === 'timed' ? (
+            <>
+              <Zap className="w-6 h-6 animate-bounce" />
+              <span>شروع چالش سرعتی ({toPersianDigits(timeDuration)} ثانیه)</span>
+            </>
+          ) : (
+            <>
+              <ShieldCheck className="w-6 h-6" />
+              <span>شروع تمرین بدون زمان ({toPersianDigits(untimedQuestionCount)} سؤال)</span>
+            </>
+          )}
         </button>
       </div>
     );
@@ -658,7 +846,13 @@ export const SpeedChallengeView: React.FC<SpeedChallengeProps> = ({
   // ----------------------------------------------------
   if (isFinished) {
     const totalAnswered = correctCount + wrongCount;
-    const avgSpeed = totalAnswered > 0 ? (60 / totalAnswered).toFixed(1) : '0';
+    const avgSpeed = totalAnswered > 0 && challengeMode === 'timed'
+      ? (timeDuration / totalAnswered).toFixed(1)
+      : totalAnswered > 0
+      ? (elapsedTime / totalAnswered).toFixed(1)
+      : '0';
+
+    const accuracyPercent = totalAnswered > 0 ? Math.round((correctCount / totalAnswered) * 100) : 100;
 
     return (
       <div className="max-w-xl mx-auto px-4 py-6 pb-24 space-y-6">
@@ -673,57 +867,77 @@ export const SpeedChallengeView: React.FC<SpeedChallengeProps> = ({
                 characterId={(stats.avatar as any) || 'fox'}
                 expression="celebration"
                 size="lg"
-                hat={stats.selectedHat}
-                glasses={stats.selectedGlasses}
-                accessory={stats.selectedAccessory}
               />
             </div>
-            <h2 className="text-2xl font-black text-slate-900">پایان مسابقه سرعتی!</h2>
+            <span className="bg-purple-100 text-purple-800 text-xs font-black px-3 py-1 rounded-full">
+              {challengeMode === 'timed'
+                ? `⏱️ پایان چالش سرعتی (${toPersianDigits(timeDuration)} ثانیه)`
+                : `🧘 پایان تمرین بدون زمان (${toPersianDigits(totalAnswered)} سؤال)`}
+            </span>
+            <h2 className="text-2xl font-black text-slate-900">
+              {accuracyPercent === 100 ? 'شگفت‌انگیز و بی‌نقص! 🌟🎉' : 'آفرین قهرمان ضرب! 👏'}
+            </h2>
             <p className="text-xs text-slate-500 font-bold">
-              عملکرد فوق‌العاده‌ای در ۶۰ ثانیه داشتی!
+              عملکرد بسیار درخشانی در تمرین ثبت کردی!
             </p>
           </div>
 
           {/* Result Cards */}
-          <div className="grid grid-cols-2 gap-3 bg-purple-50 p-4 rounded-2xl border-2 border-purple-200">
-            <div className="bg-white p-3 rounded-xl shadow-sm">
-              <p className="text-xs text-slate-500 font-bold mb-1">امتیاز نهایی</p>
-              <p className="text-2xl font-black text-purple-600 flex items-center justify-center gap-1">
-                <Trophy className="w-5 h-5 text-purple-500 fill-purple-300" />
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5 bg-purple-50 p-4 rounded-2xl border-2 border-purple-200">
+            <div className="bg-white p-3 rounded-xl shadow-xs">
+              <p className="text-xs text-slate-500 font-bold mb-1">امتیاز کسب‌شده</p>
+              <p className="text-xl font-black text-purple-600 flex items-center justify-center gap-1">
+                <Trophy className="w-4 h-4 text-purple-500 fill-purple-300" />
                 {toPersianDigits(score)}
               </p>
             </div>
 
-            <div className="bg-white p-3 rounded-xl shadow-sm">
+            <div className="bg-white p-3 rounded-xl shadow-xs">
               <p className="text-xs text-slate-500 font-bold mb-1">پاسخ‌های صحیح</p>
-              <p className="text-2xl font-black text-emerald-600">
+              <p className="text-xl font-black text-emerald-600">
                 {toPersianDigits(correctCount)}
               </p>
             </div>
 
-            <div className="bg-white p-3 rounded-xl shadow-sm">
-              <p className="text-xs text-slate-500 font-bold mb-1">کل سؤالات پاسخ داده‌شده</p>
-              <p className="text-xl font-black text-slate-800">
-                {toPersianDigits(totalAnswered)} از ۳۰
+            <div className="bg-white p-3 rounded-xl shadow-xs">
+              <p className="text-xs text-slate-500 font-bold mb-1">درصد دقت</p>
+              <p className="text-xl font-black text-blue-600">
+                {toPersianDigits(accuracyPercent)}٪
               </p>
             </div>
 
-            <div className="bg-white p-3 rounded-xl shadow-sm">
-              <p className="text-xs text-slate-500 font-bold mb-1">میانگین سرعت پاسخ</p>
-              <p className="text-xl font-black text-indigo-600">
-                {toPersianDigits(avgSpeed)} ثانیه / سؤال
+            <div className="bg-white p-3 rounded-xl shadow-xs">
+              <p className="text-xs text-slate-500 font-bold mb-1">کل سؤالات</p>
+              <p className="text-lg font-black text-slate-800">
+                {toPersianDigits(totalAnswered)}
+              </p>
+            </div>
+
+            <div className="bg-white p-3 rounded-xl shadow-xs">
+              <p className="text-xs text-slate-500 font-bold mb-1">بالاترین کمبو 🔥</p>
+              <p className="text-lg font-black text-orange-600">
+                {toPersianDigits(maxCombo)}
+              </p>
+            </div>
+
+            <div className="bg-white p-3 rounded-xl shadow-xs">
+              <p className="text-xs text-slate-500 font-bold mb-1">
+                {challengeMode === 'timed' ? 'میانگین سرعت' : 'زمان کل'}
+              </p>
+              <p className="text-lg font-black text-indigo-600">
+                {challengeMode === 'timed'
+                  ? `${toPersianDigits(avgSpeed)} ث/سؤال`
+                  : `${toPersianDigits(elapsedTime)} ثانیه`}
               </p>
             </div>
           </div>
 
           {/* Active selection in summary */}
-          <div className="text-xs font-bold text-slate-500 bg-slate-50 py-2 px-3 rounded-xl border border-slate-200">
-            تمرین انجام‌شده در: {getSelectionDescription()}
+          <div className="text-xs font-bold text-slate-600 bg-slate-50 py-2 px-3 rounded-xl border border-slate-200">
+            تمرین انجام‌شده در: <strong className="text-purple-700">{getSelectionDescription()}</strong>
           </div>
 
-          {/* ----------------------------------------------- */}
-          {/* MISTAKES REVIEW SECTION (Rule 3, 4, 5)          */}
-          {/* ----------------------------------------------- */}
+          {/* Mistakes Review Section */}
           {mistakes.length === 0 ? (
             <div className="bg-gradient-to-br from-emerald-50 to-teal-50 border-2 border-emerald-300 rounded-3xl p-5 text-center space-y-2">
               <div className="w-12 h-12 bg-emerald-100 text-emerald-600 rounded-2xl mx-auto flex items-center justify-center">
@@ -737,7 +951,7 @@ export const SpeedChallengeView: React.FC<SpeedChallengeProps> = ({
               </p>
             </div>
           ) : (
-            <div className="bg-amber-50/60 rounded-3xl p-4 sm:p-5 border-2 border-amber-200 text-right space-y-4">
+            <div className="bg-amber-50/70 rounded-3xl p-4 sm:p-5 border-2 border-amber-200 text-right space-y-4">
               <div className="flex items-center justify-between gap-2">
                 <div className="flex items-center gap-2">
                   <div className="w-8 h-8 rounded-xl bg-amber-100 text-amber-600 flex items-center justify-center font-bold">
@@ -748,55 +962,30 @@ export const SpeedChallengeView: React.FC<SpeedChallengeProps> = ({
                       اشتباه‌هات رو مرور کنیم 💡
                     </h3>
                     <p className="text-xs text-slate-500 font-medium">
-                      با مرور این ضرب‌ها، دفعه بعد بدون اشتباه رکورد می‌زنی!
+                      با مرور این {toPersianDigits(mistakes.length)} ضرب، تسلطت کامل می‌شه
                     </p>
                   </div>
                 </div>
-
-                <span className="text-[11px] font-black text-amber-800 bg-amber-200/80 px-2.5 py-1 rounded-xl border border-amber-300 shrink-0">
-                  {toPersianDigits(mistakes.length)} سؤال نیاز به مرور
-                </span>
               </div>
 
-              {/* Cards List of Mistakes */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+              {/* Mistakes List */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                 {mistakes.map((m, idx) => (
                   <div
                     key={idx}
-                    className="bg-white p-3 rounded-2xl border border-amber-200 shadow-sm flex items-center justify-between gap-2"
+                    className="bg-white p-3 rounded-xl border border-amber-200 flex items-center justify-between text-xs font-bold"
                   >
-                    {/* Math Expression */}
-                    <div className="font-black text-base text-slate-800 flex items-center gap-1.5 typo-math-medium">
-                      <span className="text-purple-600">
-                        {toPersianDigits(m.factor1)} × {toPersianDigits(m.factor2)}
+                    <div className="flex items-center gap-2" dir="ltr">
+                      <span className="font-black text-slate-900">
+                        {toPersianDigits(m.factor1)} × {toPersianDigits(m.factor2)} =
                       </span>
-                      <span className="text-slate-400">=</span>
-                    </div>
-
-                    {/* Comparison Chips */}
-                    <div className="flex items-center gap-1.5 text-xs font-bold">
-                      {/* User's wrong answer */}
-                      <span
-                        className="bg-rose-50 text-rose-700 border border-rose-200 px-2 py-1 rounded-xl flex items-center gap-1"
-                        title="پاسخ شما"
-                      >
-                        <span className="text-[10px] text-rose-500">شما:</span>
-                        <span className="font-black typo-math-small line-through decoration-rose-400">
-                          {toPersianDigits(m.userAnswer)}
-                        </span>
-                      </span>
-
-                      {/* Correct answer */}
-                      <span
-                        className="bg-emerald-50 text-emerald-800 border border-emerald-200 px-2 py-1 rounded-xl flex items-center gap-1 font-black"
-                        title="پاسخ درست"
-                      >
-                        <span className="text-[10px] text-emerald-600">درست:</span>
-                        <span className="typo-math-small text-emerald-700">
-                          {toPersianDigits(m.correctAnswer)}
-                        </span>
+                      <span className="text-emerald-700 font-black bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-200">
+                        {toPersianDigits(m.correctAnswer)}
                       </span>
                     </div>
+                    <span className="text-rose-600 bg-rose-50 px-2 py-0.5 rounded-md text-[11px]">
+                      پاسخ تو: {toPersianDigits(m.userAnswer)}
+                    </span>
                   </div>
                 ))}
               </div>
@@ -819,7 +1008,18 @@ export const SpeedChallengeView: React.FC<SpeedChallengeProps> = ({
               className="flex-1 bg-purple-500 hover:bg-purple-600 text-white font-black py-3.5 px-4 rounded-2xl shadow-lg border-b-4 border-purple-700 flex items-center justify-center gap-2 cursor-pointer active:scale-95 transition-transform"
             >
               <RotateCcw className="w-5 h-5" />
-              <span>تلاش دوباره مسابقه</span>
+              <span>تلاش دوباره</span>
+            </button>
+
+            <button
+              onClick={() => {
+                setIsFinished(false);
+                setIsPlaying(false);
+              }}
+              className="flex-1 bg-purple-50 hover:bg-purple-100 text-purple-900 font-black py-3.5 px-4 rounded-2xl border-2 border-purple-200 flex items-center justify-center gap-2 cursor-pointer"
+            >
+              <SlidersHorizontal className="w-5 h-5 text-purple-600" />
+              <span>تغییر تنظیمات و جدول‌ها</span>
             </button>
 
             <button
@@ -827,7 +1027,7 @@ export const SpeedChallengeView: React.FC<SpeedChallengeProps> = ({
               className="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-800 font-extrabold py-3.5 px-4 rounded-2xl border-2 border-slate-300 flex items-center justify-center gap-2 cursor-pointer transition-colors"
             >
               <ArrowRight className="w-5 h-5" />
-              <span>منوی اصلی</span>
+              <span>بازگشت</span>
             </button>
           </div>
         </motion.div>
@@ -838,25 +1038,35 @@ export const SpeedChallengeView: React.FC<SpeedChallengeProps> = ({
   // ----------------------------------------------------
   // VIEW: ACTIVE CHALLENGE GAMEPLAY
   // ----------------------------------------------------
+  const maxQ = challengeMode === 'untimed' ? untimedQuestionCount : 30;
+
   return (
-    <div className="max-w-xl mx-auto px-4 py-4 pb-24 space-y-5">
-      {/* Top Bar: Timer, Score, Combo */}
+    <div className="max-w-xl mx-auto px-4 py-4 pb-24 space-y-4">
+      {/* Top Bar */}
       <div className="bg-white rounded-2xl p-3 shadow-md border-2 border-purple-200 flex items-center justify-between">
-        {/* Timer */}
-        <div
-          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl font-black text-base ${
-            timeLeft <= 10
-              ? 'bg-rose-500 text-white animate-pulse'
-              : 'bg-purple-100 text-purple-900'
-          }`}
-        >
-          <Clock className="w-5 h-5" />
-          <span>{toPersianDigits(timeLeft)} ثانیه</span>
-        </div>
+        
+        {/* Timer or Untimed indicator */}
+        {challengeMode === 'timed' ? (
+          <div
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl font-black text-sm sm:text-base ${
+              timeLeft <= 10
+                ? 'bg-rose-500 text-white animate-pulse'
+                : 'bg-purple-100 text-purple-900'
+            }`}
+          >
+            <Clock className="w-4 h-4" />
+            <span>{toPersianDigits(timeLeft)} ثانیه</span>
+          </div>
+        ) : (
+          <div className="flex items-center gap-1.5 bg-emerald-100 text-emerald-900 px-3 py-1.5 rounded-xl font-black text-xs sm:text-sm">
+            <Smile className="w-4 h-4 text-emerald-600" />
+            <span>تمرین بدون زمان</span>
+          </div>
+        )}
 
         {/* Question Index */}
-        <div className="text-xs font-black text-slate-500">
-          سؤال {toPersianDigits(questionIndex + 1)} از ۳۰
+        <div className="text-xs font-black text-slate-600 bg-slate-100 px-2.5 py-1 rounded-xl">
+          سؤال {toPersianDigits(questionIndex + 1)} از {toPersianDigits(maxQ)}
         </div>
 
         {/* Combo */}
@@ -868,13 +1078,33 @@ export const SpeedChallengeView: React.FC<SpeedChallengeProps> = ({
           />
           <span>کمبو: {toPersianDigits(combo)}</span>
         </div>
+
+        {/* End early button in untimed */}
+        {challengeMode === 'untimed' && (
+          <button
+            onClick={handleFinishGame}
+            className="text-[11px] font-black text-slate-500 hover:text-slate-800 bg-slate-100 px-2 py-1 rounded-lg cursor-pointer"
+          >
+            پایان
+          </button>
+        )}
       </div>
 
-      {/* Timer Bar */}
-      <div className="w-full bg-slate-200 h-3 rounded-full overflow-hidden shadow-inner">
+      {/* Progress Bar */}
+      <div className="w-full bg-slate-200 h-2.5 rounded-full overflow-hidden shadow-inner">
         <div
-          className="bg-gradient-to-r from-purple-500 to-pink-500 h-full transition-all duration-1000 rounded-full"
-          style={{ width: `${(timeLeft / 60) * 100}%` }}
+          className={`h-full transition-all duration-300 rounded-full ${
+            challengeMode === 'timed'
+              ? 'bg-gradient-to-r from-purple-500 to-pink-500'
+              : 'bg-gradient-to-r from-emerald-400 to-teal-500'
+          }`}
+          style={{
+            width: `${
+              challengeMode === 'timed'
+                ? (timeLeft / timeDuration) * 100
+                : ((questionIndex + 1) / maxQ) * 100
+            }%`,
+          }}
         />
       </div>
 
@@ -896,9 +1126,6 @@ export const SpeedChallengeView: React.FC<SpeedChallengeProps> = ({
                 : 'idle'
             }
             size="md"
-            hat={stats.selectedHat}
-            glasses={stats.selectedGlasses}
-            accessory={stats.selectedAccessory}
           />
         </div>
 
@@ -915,10 +1142,12 @@ export const SpeedChallengeView: React.FC<SpeedChallengeProps> = ({
               {feedback.message}
             </span>
           ) : (
-            <span>مسابقه سرعتی</span>
+            <span className="text-purple-600 font-bold">
+              {challengeMode === 'timed' ? '⚡ چالش سرعتی' : '🧘 تمرین آرام و دقیق'}
+            </span>
           )}
 
-          <span className="text-purple-600 font-black text-sm">
+          <span className="text-purple-700 font-black text-sm">
             امتیاز: {toPersianDigits(score)}
           </span>
         </div>
@@ -980,4 +1209,3 @@ export const SpeedChallengeView: React.FC<SpeedChallengeProps> = ({
     </div>
   );
 };
-

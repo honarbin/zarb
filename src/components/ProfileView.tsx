@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
-import { User, Award, BrainCircuit, Edit2, Check, Sparkles, AlertCircle, Play, ShieldAlert, Award as AwardIcon, GraduationCap, ChevronLeft } from 'lucide-react';
+import { motion, AnimatePresence } from 'motion/react';
+import confetti from 'canvas-confetti';
+import { User, Award, BrainCircuit, Edit2, Check, Sparkles, AlertCircle, Play, ShieldAlert, GraduationCap, ChevronLeft, Heart, MessageSquare, Send, X, Info } from 'lucide-react';
 import { UserStats, Badge, DifficultyLevel } from '../types';
 import { toPersianDigits, sounds } from '../utils/persian';
 import { MathFormula } from './MathFormula';
@@ -11,32 +13,23 @@ interface ProfileViewProps {
   onUpdateStats: (newStats: UserStats) => void;
   onStartFocusedPractice: () => void;
   onNavigateToRecords?: () => void;
+  onNavigateToAbout?: () => void;
+  onNavigateToPythagoras?: () => void;
+  onNavigateToWorksheet?: () => void;
 }
 
-const HATS_W_REQUIREMENTS = [
-  { id: 'none', label: 'بدون کلاه ✖', score: 0 },
-  { id: 'detective', label: 'کلاه کارآگاه 🕵️‍♂️', score: 100 },
-  { id: 'crown', label: 'تاج طلایی 👑', score: 300 },
-  { id: 'wizard', label: 'کلاه جادوگر ضرب 🧙‍♂️', score: 500 },
-];
-
-const GLASSES_W_REQUIREMENTS = [
-  { id: 'none', label: 'بدون عینک ✖', score: 0 },
-  { id: 'cool', label: 'عینک خفن 😎', score: 150 },
-  { id: 'smart', label: 'عینک دانشمند 🤓', score: 250 },
-];
-
-const ACC_W_REQUIREMENTS = [
-  { id: 'none', label: 'بدون مدال ✖', score: 0 },
-  { id: 'star_badge', label: 'ستاره قهرمانی ⭐', score: 50 },
-  { id: 'gold_medal', label: 'مدال طلای ضرببرگ 🥇', score: 200 },
-];
+// Support & Feedback Config
+const SUPPORT_URL = 'https://pay.zarbyar.com'; // قابل تنظیم برای آدرس پرداخت نهایی حمایت
+const FEEDBACK_API_URL = ''; // قابل تنظیم برای آدرس API یا وب‌هوک دریافت بازخورد
 
 export const ProfileView: React.FC<ProfileViewProps> = ({
   stats,
   onUpdateStats,
   onStartFocusedPractice,
   onNavigateToRecords,
+  onNavigateToAbout,
+  onNavigateToPythagoras,
+  onNavigateToWorksheet,
 }) => {
   const [isEditingName, setIsEditingName] = useState<boolean>(false);
   const [nameInput, setNameInput] = useState<string>(stats.username || 'قهرمان کوچک');
@@ -58,30 +51,6 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
     onUpdateStats(updated);
     setActiveExpression('correct');
     sounds.playCorrectSound();
-    setTimeout(() => setActiveExpression('idle'), 1500);
-  };
-
-  const handleEquipHat = (hatId: string) => {
-    const updated = { ...stats, selectedHat: hatId };
-    saveUserStats(updated);
-    onUpdateStats(updated);
-    setActiveExpression('celebration');
-    setTimeout(() => setActiveExpression('idle'), 1500);
-  };
-
-  const handleEquipGlasses = (glassId: string) => {
-    const updated = { ...stats, selectedGlasses: glassId };
-    saveUserStats(updated);
-    onUpdateStats(updated);
-    setActiveExpression('celebration');
-    setTimeout(() => setActiveExpression('idle'), 1500);
-  };
-
-  const handleEquipAcc = (accId: string) => {
-    const updated = { ...stats, selectedAccessory: accId };
-    saveUserStats(updated);
-    onUpdateStats(updated);
-    setActiveExpression('celebration');
     setTimeout(() => setActiveExpression('idle'), 1500);
   };
 
@@ -110,9 +79,6 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
               characterId={(stats.avatar as any) || 'fox'}
               expression={activeExpression}
               size="xl"
-              hat={stats.selectedHat}
-              glasses={stats.selectedGlasses}
-              accessory={stats.selectedAccessory}
             />
             <div className="absolute -bottom-1 -right-1 bg-amber-400 text-slate-950 font-black text-[10px] px-2.5 py-1 rounded-full border border-amber-200 animate-bounce">
               قهرمانت رو انتخاب کن ✨
@@ -187,6 +153,67 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
         </div>
       )}
 
+      {/* 📖 داستان ضربیار و حمایت اختیاری */}
+      {onNavigateToAbout && (
+        <div className="bg-gradient-to-br from-pink-500/10 via-amber-500/5 to-transparent border-2 border-pink-300 rounded-3xl p-5 shadow-xs flex flex-col sm:flex-row items-center justify-between gap-4">
+          <div className="flex items-start gap-3 text-right">
+            <div className="w-10 h-10 rounded-2xl bg-pink-100 flex items-center justify-center text-pink-600 shrink-0 mt-0.5">
+              <Heart className="w-5 h-5 fill-pink-300 animate-pulse" />
+            </div>
+            <div className="space-y-0.5 flex-1">
+              <h3 className="font-black text-sm text-slate-900">📖 داستان ضربیار</h3>
+              <p className="text-[11px] text-slate-600 font-bold leading-relaxed">
+                می‌خواهی بدانی چرا ضربیار ساخته شد؟
+              </p>
+            </div>
+          </div>
+
+          <button
+            onClick={onNavigateToAbout}
+            className="w-full sm:w-auto shrink-0 bg-pink-500 hover:bg-pink-600 text-white font-black text-xs px-4 py-2.5 rounded-2xl border-b-4 border-pink-700 transition-all shadow-xs flex items-center justify-center gap-1 cursor-pointer active:scale-95"
+          >
+            <span>مشاهده داستان ←</span>
+          </button>
+        </div>
+      )}
+
+      {/* 🛠️ ابزارهای ویژه یادگیری و آموزش */}
+      {(onNavigateToPythagoras || onNavigateToWorksheet) && (
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          {onNavigateToPythagoras && (
+            <button
+              onClick={onNavigateToPythagoras}
+              className="bg-indigo-50 hover:bg-indigo-100/80 border-2 border-indigo-200 p-4 rounded-3xl text-right flex items-center justify-between gap-3 cursor-pointer transition-all shadow-2xs group"
+            >
+              <div className="space-y-0.5">
+                <span className="text-[10px] font-black text-indigo-600 bg-indigo-100 px-2 py-0.5 rounded-full">
+                  کاوش الگوها
+                </span>
+                <h4 className="text-xs font-black text-slate-900">جدول تعاملی فیثاغورس</h4>
+                <p className="text-[10px] text-slate-500 font-bold">شگفتی ماتریس ضرب و تقارن</p>
+              </div>
+              <span className="text-lg">🔢</span>
+            </button>
+          )}
+
+          {onNavigateToWorksheet && (
+            <button
+              onClick={onNavigateToWorksheet}
+              className="bg-emerald-50 hover:bg-emerald-100/80 border-2 border-emerald-200 p-4 rounded-3xl text-right flex items-center justify-between gap-3 cursor-pointer transition-all shadow-2xs group"
+            >
+              <div className="space-y-0.5">
+                <span className="text-[10px] font-black text-emerald-600 bg-emerald-100 px-2 py-0.5 rounded-full">
+                  چاپ و آزمون A4
+                </span>
+                <h4 className="text-xs font-black text-slate-900">سازنده کاربرگ چاپی</h4>
+                <p className="text-[10px] text-slate-500 font-bold">تولید تمرین PDF با پاسخ‌نامه</p>
+              </div>
+              <span className="text-lg">🖨️</span>
+            </button>
+          )}
+        </div>
+      )}
+
       {/* 1. Character Selector Section (Cards Grid) */}
       <div className="space-y-4">
         <div className="flex items-center gap-2 text-slate-900">
@@ -213,9 +240,6 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
                     characterId={charId}
                     expression={isSelected ? 'cheering' : 'idle'}
                     size="lg"
-                    hat={isSelected ? stats.selectedHat : 'none'}
-                    glasses={isSelected ? stats.selectedGlasses : 'none'}
-                    accessory={isSelected ? stats.selectedAccessory : 'none'}
                   />
                 </div>
 
@@ -251,132 +275,6 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
         </div>
       </div>
 
-      {/* 2. Personalization Wardrobe (اتاق پرو قهرمان) */}
-      <div className="bg-white rounded-3xl p-5 shadow-md border-2 border-indigo-200 space-y-5">
-        <div className="flex items-center gap-2 text-indigo-950 border-b border-slate-100 pb-3">
-          <AwardIcon className="w-6 h-6 text-indigo-500 fill-indigo-200" />
-          <div>
-            <h3 className="font-black text-base">اتاق پرو قهرمان من 👕🧢</h3>
-            <p className="text-[11px] text-slate-500">لباس‌ها و وسایل تزئینی جذاب رو با امتیازاتی که می‌گیری آزاد کن!</p>
-          </div>
-        </div>
-
-        {/* Hats Section */}
-        <div className="space-y-2.5">
-          <h4 className="font-bold text-xs text-slate-800">۱. کلاه و تاج مناسب:</h4>
-          <div className="grid grid-cols-2 gap-2">
-            {HATS_W_REQUIREMENTS.map((hatItem) => {
-              const isUnlocked = stats.totalScore >= hatItem.score;
-              const isEquipped = stats.selectedHat === hatItem.id;
-              return (
-                <button
-                  key={hatItem.id}
-                  disabled={!isUnlocked}
-                  onClick={() => handleEquipHat(hatItem.id)}
-                  className={`p-3 rounded-2xl border-2 text-xs font-bold transition-all flex flex-col items-center justify-center gap-1 relative ${
-                    !isUnlocked
-                      ? 'bg-slate-100 border-slate-200 text-slate-400 cursor-not-allowed'
-                      : isEquipped
-                      ? 'bg-amber-50 border-amber-400 text-amber-950 ring-2 ring-amber-200'
-                      : 'bg-white border-slate-200 text-slate-700 hover:border-amber-300 cursor-pointer'
-                  }`}
-                >
-                  <span>{hatItem.label}</span>
-                  {!isUnlocked ? (
-                    <span className="text-[9px] bg-slate-200 text-slate-600 px-1.5 py-0.5 rounded-full font-black">
-                      🔒 نیاز به {toPersianDigits(hatItem.score)} امتیاز
-                    </span>
-                  ) : isEquipped ? (
-                    <span className="text-[9px] bg-amber-400 text-slate-900 px-1.5 py-0.5 rounded-full font-black">
-                      استفاده شده
-                    </span>
-                  ) : (
-                    <span className="text-[9px] text-indigo-600 font-black">انتخاب کردن</span>
-                  )}
-                </button>
-              );
-            })}
-          </div>
-        </div>
-
-        {/* Glasses Section */}
-        <div className="space-y-2.5">
-          <h4 className="font-bold text-xs text-slate-800">۲. عینک‌های خفن و هوشمند:</h4>
-          <div className="grid grid-cols-2 gap-2">
-            {GLASSES_W_REQUIREMENTS.map((glassItem) => {
-              const isUnlocked = stats.totalScore >= glassItem.score;
-              const isEquipped = stats.selectedGlasses === glassItem.id;
-              return (
-                <button
-                  key={glassItem.id}
-                  disabled={!isUnlocked}
-                  onClick={() => handleEquipGlasses(glassItem.id)}
-                  className={`p-3 rounded-2xl border-2 text-xs font-bold transition-all flex flex-col items-center justify-center gap-1 relative ${
-                    !isUnlocked
-                      ? 'bg-slate-100 border-slate-200 text-slate-400 cursor-not-allowed'
-                      : isEquipped
-                      ? 'bg-cyan-50 border-cyan-400 text-cyan-950 ring-2 ring-cyan-200'
-                      : 'bg-white border-slate-200 text-slate-700 hover:border-cyan-300 cursor-pointer'
-                  }`}
-                >
-                  <span>{glassItem.label}</span>
-                  {!isUnlocked ? (
-                    <span className="text-[9px] bg-slate-200 text-slate-600 px-1.5 py-0.5 rounded-full font-black">
-                      🔒 نیاز به {toPersianDigits(glassItem.score)} امتیاز
-                    </span>
-                  ) : isEquipped ? (
-                    <span className="text-[9px] bg-cyan-400 text-slate-900 px-1.5 py-0.5 rounded-full font-black">
-                      استفاده شده
-                    </span>
-                  ) : (
-                    <span className="text-[9px] text-indigo-600 font-black">انتخاب کردن</span>
-                  )}
-                </button>
-              );
-            })}
-          </div>
-        </div>
-
-        {/* Medals & Badges Section */}
-        <div className="space-y-2.5">
-          <h4 className="font-bold text-xs text-slate-800">۳. مدال‌ها و نشان‌های افتخار روی سینه:</h4>
-          <div className="grid grid-cols-2 gap-2">
-            {ACC_W_REQUIREMENTS.map((accItem) => {
-              const isUnlocked = stats.totalScore >= accItem.score;
-              const isEquipped = stats.selectedAccessory === accItem.id;
-              return (
-                <button
-                  key={accItem.id}
-                  disabled={!isUnlocked}
-                  onClick={() => handleEquipAcc(accItem.id)}
-                  className={`p-3 rounded-2xl border-2 text-xs font-bold transition-all flex flex-col items-center justify-center gap-1 relative ${
-                    !isUnlocked
-                      ? 'bg-slate-100 border-slate-200 text-slate-400 cursor-not-allowed'
-                      : isEquipped
-                      ? 'bg-pink-50 border-pink-400 text-pink-950 ring-2 ring-pink-200'
-                      : 'bg-white border-slate-200 text-slate-700 hover:border-pink-300 cursor-pointer'
-                  }`}
-                >
-                  <span>{accItem.label}</span>
-                  {!isUnlocked ? (
-                    <span className="text-[9px] bg-slate-200 text-slate-600 px-1.5 py-0.5 rounded-full font-black">
-                      🔒 نیاز به {toPersianDigits(accItem.score)} امتیاز
-                    </span>
-                  ) : isEquipped ? (
-                    <span className="text-[9px] bg-pink-400 text-slate-900 px-1.5 py-0.5 rounded-full font-black">
-                      استفاده شده
-                    </span>
-                  ) : (
-                    <span className="text-[9px] text-indigo-600 font-black">انتخاب کردن</span>
-                  )}
-                </button>
-              );
-            })}
-          </div>
-        </div>
-      </div>
-
-      {/* Sound & Audio Settings Section */}
       {/* Sound Settings Section */}
       <div className="bg-white rounded-3xl p-5 shadow-md border-2 border-indigo-200 space-y-4">
         <div className="flex items-center justify-between border-b border-indigo-100 pb-3">

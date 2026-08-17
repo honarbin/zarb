@@ -14,9 +14,12 @@ import {
   Grid,
   Check,
   Zap,
-  BookOpen
+  BookOpen,
+  Lightbulb,
+  ChevronLeft
 } from 'lucide-react';
 import { toPersianDigits, sounds } from '../utils/persian';
+import { getSmartRecommendation } from '../utils/storage';
 import { MathFormula } from './MathFormula';
 import { MathExpression } from './MathExpression';
 import { GameCharacter } from './GameCharacter';
@@ -45,6 +48,16 @@ export const ConceptView: React.FC<ConceptViewProps> = ({
   onNavigateToPractice,
 }) => {
   const [activeTab, setActiveTab] = useState<ConceptSubTab>('lessons');
+
+  const recommendation = getSmartRecommendation(stats);
+
+  const handleRecommendationClick = () => {
+    if (recommendation.tableTarget) {
+      onStartTablePractice(recommendation.tableTarget);
+    } else {
+      onNavigateToPractice();
+    }
+  };
 
   // --- Sub-Tab 1 State: Lessons & Commutativity Toggle ---
   const [commutativityOrder, setCommutativityOrder] = useState<'3x4' | '4x3'>('3x4');
@@ -266,9 +279,6 @@ export const ConceptView: React.FC<ConceptViewProps> = ({
             characterId={(stats.avatar as any) || 'fox'}
             expression="idle"
             size="sm"
-            hat={stats.selectedHat}
-            glasses={stats.selectedGlasses}
-            accessory={stats.selectedAccessory}
           />
         </div>
         <div className="space-y-0.5">
@@ -278,6 +288,37 @@ export const ConceptView: React.FC<ConceptViewProps> = ({
           <p className="text-[11px] text-slate-500 font-bold leading-relaxed typo-body-small">
             امروز آماده‌ای یک مرحله دیگه جلو بری و جدول ضرب رو مثل آب خوردن یاد بگیری؟ 🚀
           </p>
+        </div>
+      </div>
+
+      {/* 💡 Smart Daily Practice Recommendation (Rule 6) */}
+      <div className="bg-gradient-to-br from-amber-500/10 via-orange-500/5 to-transparent border-2 border-amber-300/80 rounded-3xl p-4 shadow-xs relative overflow-hidden">
+        <div className="flex items-start justify-between gap-3 flex-col sm:flex-row">
+          <div className="space-y-1.5 text-right flex-1">
+            <div className="flex items-center gap-1.5 flex-wrap">
+              <span className="bg-amber-500 text-slate-950 font-black text-[10px] px-2.5 py-0.5 rounded-full shadow-xs">
+                {recommendation.badgeText}
+              </span>
+              <span className="text-xs font-black text-slate-800 flex items-center gap-1">
+                <Lightbulb className="w-4 h-4 text-amber-600 fill-amber-300" />
+                <span>پیشنهاد تمرین امروز (بر اساس یادگیری تو)</span>
+              </span>
+            </div>
+            <h4 className="font-black text-sm text-slate-900 pt-0.5">
+              {recommendation.title}
+            </h4>
+            <p className="text-[11px] text-slate-600 font-bold leading-relaxed">
+              {recommendation.description}
+            </p>
+          </div>
+
+          <button
+            onClick={handleRecommendationClick}
+            className="w-full sm:w-auto shrink-0 bg-amber-500 hover:bg-amber-600 text-slate-950 font-black text-xs px-4 py-2.5 rounded-2xl shadow-sm hover:shadow transition-all flex items-center justify-center gap-1.5 cursor-pointer active:scale-95"
+          >
+            <span>{recommendation.actionLabel}</span>
+            <ChevronLeft className="w-4 h-4" />
+          </button>
         </div>
       </div>
 
@@ -422,9 +463,6 @@ export const ConceptView: React.FC<ConceptViewProps> = ({
                     characterId={(stats.avatar as any) || 'fox'}
                     expression="cheering"
                     size="sm"
-                    hat={stats.selectedHat}
-                    glasses={stats.selectedGlasses}
-                    accessory={stats.selectedAccessory}
                   />
                 </div>
                 <div className="text-[11px] text-slate-800 font-extrabold text-right leading-relaxed">

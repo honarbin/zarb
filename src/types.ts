@@ -1,4 +1,4 @@
-export type AppView = 'concept' | 'tricks' | 'practice' | 'learn' | 'summary' | 'speed' | 'records' | 'profile';
+export type AppView = 'concept' | 'tricks' | 'summary' | 'practice' | 'learn' | 'speed' | 'records' | 'profile' | 'about' | 'pythagoras' | 'worksheet';
 
 export type DifficultyLevel = 'easy' | 'medium' | 'hard' | 'weaknesses';
 

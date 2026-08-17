@@ -1,5 +1,5 @@
 import React from 'react';
-import { Volume2, VolumeX, Sparkles, Trophy } from 'lucide-react';
+import { Volume2, VolumeX, Sparkles, Trophy, Heart } from 'lucide-react';
 import { UserStats, AppView } from '../types';
 import { toPersianDigits } from '../utils/persian';
 import { GameCharacter } from './GameCharacter';
@@ -38,8 +38,18 @@ export const Header: React.FC<HeaderProps> = ({ stats, onToggleSound, onNavigate
         </button>
 
         {/* Right Controls: Score Pill, Sound Toggle, Profile Avatar */}
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1.5">
           
+          {/* داستان صمیمی ضربیار */}
+          <button
+            onClick={() => onNavigate('about')}
+            className="flex items-center gap-1 bg-rose-500 hover:bg-rose-600 text-white px-2.5 py-1.5 rounded-2xl border-2 border-rose-300 shadow-sm font-black text-xs transition-all cursor-pointer hover:scale-105 active:scale-95 shrink-0"
+            title="داستان صمیمی ضربیار"
+          >
+            <Heart className="w-3.5 h-3.5 fill-rose-200" />
+            <span className="text-[10px] sm:text-xs">داستان</span>
+          </button>
+
           {/* Total Score & Progress Report Display */}
           <button
             onClick={() => onNavigate('records')}
@@ -75,9 +85,6 @@ export const Header: React.FC<HeaderProps> = ({ stats, onToggleSound, onNavigate
             <GameCharacter
               characterId={(stats.avatar as any) || 'fox'}
               size="xs"
-              hat={stats.selectedHat}
-              glasses={stats.selectedGlasses}
-              accessory={stats.selectedAccessory}
             />
           </button>
 

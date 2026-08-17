@@ -377,9 +377,6 @@ export const PracticeView: React.FC<PracticeViewProps> = ({ stats, onUpdateStats
                 characterId={(stats.avatar as any) || 'fox'}
                 expression="celebration"
                 size="lg"
-                hat={stats.selectedHat}
-                glasses={stats.selectedGlasses}
-                accessory={stats.selectedAccessory}
               />
             </div>
             <h2 className="text-2xl font-black text-slate-900">{summary.message}</h2>
@@ -517,9 +514,6 @@ export const PracticeView: React.FC<PracticeViewProps> = ({ stats, onUpdateStats
                 : 'idle'
             }
             size="md"
-            hat={stats.selectedHat}
-            glasses={stats.selectedGlasses}
-            accessory={stats.selectedAccessory}
           />
         </div>
 

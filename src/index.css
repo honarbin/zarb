@@ -283,3 +283,28 @@
 ::-webkit-scrollbar-thumb:hover {
   background: rgba(245, 158, 11, 0.7);
 }
+
+/* Print Styles for Printable Worksheets */
+@media print {
+  body {
+    background: white !important;
+    color: black !important;
+    user-select: text !important;
+    -webkit-user-select: text !important;
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+
+  header,
+  nav,
+  footer,
+  .print\:hidden {
+    display: none !important;
+  }
+
+  @page {
+    size: A4 portrait;
+    margin: 1.2cm 1cm;
+  }
+}
+

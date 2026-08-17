@@ -17,6 +17,9 @@ import { SpeedChallengeView } from './components/SpeedChallengeView';
 import { RecordsView } from './components/RecordsView';
 import { ProfileView } from './components/ProfileView';
 import { SummaryView } from './components/SummaryView';
+import { AboutView } from './components/AboutView';
+import { PythagorasView } from './components/PythagorasView';
+import { WorksheetView } from './components/WorksheetView';
 
 export default function App() {
   const [currentView, setCurrentView] = useState<AppView>('concept');
@@ -33,6 +36,9 @@ export default function App() {
     speed: 0,
     records: 0,
     profile: 0,
+    about: 0,
+    pythagoras: 0,
+    worksheet: 0,
   });
 
   // Load and save user stats sync & audio setup
@@ -69,6 +75,9 @@ export default function App() {
   };
 
   const handleNavigate = (view: AppView) => {
+    if (view !== 'speed') {
+      setFocusedTableForPractice(null);
+    }
     // Increment view key so any active subview/detail state resets to root
     setViewKeys((prev) => ({
       ...prev,
@@ -79,7 +88,11 @@ export default function App() {
 
   const handleStartTablePractice = (tableNum: number) => {
     setFocusedTableForPractice(tableNum);
-    handleNavigate('practice');
+    setViewKeys((prev) => ({
+      ...prev,
+      speed: prev.speed + 1,
+    }));
+    setCurrentView('speed');
   };
 
   const handleStartWeaknessPractice = () => {
@@ -138,15 +151,25 @@ export default function App() {
             stats={userStats}
             onStartTablePractice={handleStartTablePractice}
             onNavigateToConcept={() => handleNavigate('concept')}
+            onNavigateToPythagoras={() => handleNavigate('pythagoras')}
+            onNavigateToWorksheet={() => handleNavigate('worksheet')}
           />
         )}
 
         {currentView === 'speed' && (
           <SpeedChallengeView
-            key={`speed-${viewKeys.speed}`}
+            key={`speed-${viewKeys.speed}-${focusedTableForPractice ?? 'all'}`}
             stats={userStats}
+            initialTable={focusedTableForPractice}
             onUpdateStats={handleUpdateStats}
-            onBackToMenu={() => handleNavigate('practice')}
+            onBackToMenu={() => {
+              if (focusedTableForPractice) {
+                setFocusedTableForPractice(null);
+                handleNavigate('learn');
+              } else {
+                handleNavigate('practice');
+              }
+            }}
           />
         )}
 
@@ -167,6 +190,33 @@ export default function App() {
             onUpdateStats={handleUpdateStats}
             onStartFocusedPractice={handleStartWeaknessPractice}
             onNavigateToRecords={() => handleNavigate('records')}
+            onNavigateToAbout={() => handleNavigate('about')}
+            onNavigateToPythagoras={() => handleNavigate('pythagoras')}
+            onNavigateToWorksheet={() => handleNavigate('worksheet')}
+          />
+        )}
+
+        {currentView === 'about' && (
+          <AboutView
+            key={`about-${viewKeys.about}`}
+            stats={userStats}
+            onBack={() => handleNavigate('profile')}
+          />
+        )}
+
+        {currentView === 'pythagoras' && (
+          <PythagorasView
+            key={`pythagoras-${viewKeys.pythagoras}`}
+            stats={userStats}
+            onBack={() => handleNavigate('learn')}
+            onStartPractice={handleStartTablePractice}
+          />
+        )}
+
+        {currentView === 'worksheet' && (
+          <WorksheetView
+            key={`worksheet-${viewKeys.worksheet}`}
+            onBack={() => handleNavigate('learn')}
           />
         )}
       </main>

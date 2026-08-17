@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { BookOpen, ArrowRight, Grid, Sparkles, Play, CheckCircle, Star } from 'lucide-react';
+import { BookOpen, ArrowRight, Grid, Sparkles, Play, CheckCircle, Star, Printer, Layers } from 'lucide-react';
 import { UserStats } from '../types';
 import { toPersianDigits, sounds } from '../utils/persian';
 import { getTableProgress } from '../utils/storage';
@@ -11,9 +11,17 @@ interface LearnViewProps {
   stats?: UserStats;
   onStartTablePractice: (tableNum: number) => void;
   onNavigateToConcept?: () => void;
+  onNavigateToPythagoras?: () => void;
+  onNavigateToWorksheet?: () => void;
 }
 
-export const LearnView: React.FC<LearnViewProps> = ({ stats, onStartTablePractice, onNavigateToConcept }) => {
+export const LearnView: React.FC<LearnViewProps> = ({
+  stats,
+  onStartTablePractice,
+  onNavigateToConcept,
+  onNavigateToPythagoras,
+  onNavigateToWorksheet,
+}) => {
   const [selectedTable, setSelectedTable] = useState<number | null>(null);
   const [activeVisualPair, setActiveVisualPair] = useState<{ f1: number; f2: number } | null>(null);
   const [showPreLesson, setShowPreLesson] = useState<boolean>(true);
@@ -51,6 +59,53 @@ export const LearnView: React.FC<LearnViewProps> = ({ stats, onStartTablePractic
             </button>
           </div>
         )}
+
+        {/* Special Tools: Pythagoras Table & Printable Worksheet Generator */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+          {onNavigateToPythagoras && (
+            <button
+              onClick={onNavigateToPythagoras}
+              className="bg-gradient-to-br from-indigo-500 via-purple-500 to-indigo-600 text-white p-4 rounded-3xl shadow-md border-3 border-indigo-300 text-right flex items-center justify-between gap-3 cursor-pointer group hover:scale-[1.02] active:scale-98 transition-all"
+            >
+              <div className="space-y-1">
+                <span className="bg-white/20 text-white text-[10px] font-black px-2.5 py-0.5 rounded-full">
+                  ابزار شگفت‌انگیز 🔢
+                </span>
+                <h3 className="text-sm font-black text-white">
+                  جدول تعاملی فیثاغورس
+                </h3>
+                <p className="text-[11px] font-bold text-indigo-100 leading-snug">
+                  کشف الگوها، خاصیت جابجایی و چالش خانه‌های پنهان
+                </p>
+              </div>
+              <div className="w-10 h-10 rounded-2xl bg-white/20 flex items-center justify-center text-xl shrink-0 group-hover:bg-white group-hover:text-indigo-900 transition-colors">
+                ✨
+              </div>
+            </button>
+          )}
+
+          {onNavigateToWorksheet && (
+            <button
+              onClick={onNavigateToWorksheet}
+              className="bg-gradient-to-br from-emerald-500 via-teal-500 to-emerald-600 text-white p-4 rounded-3xl shadow-md border-3 border-emerald-300 text-right flex items-center justify-between gap-3 cursor-pointer group hover:scale-[1.02] active:scale-98 transition-all"
+            >
+              <div className="space-y-1">
+                <span className="bg-white/20 text-white text-[10px] font-black px-2.5 py-0.5 rounded-full">
+                  ویژه اولیا و آموزگاران 🖨️
+                </span>
+                <h3 className="text-sm font-black text-white">
+                  کاربرگ‌ساز چاپی (PDF)
+                </h3>
+                <p className="text-[11px] font-bold text-emerald-100 leading-snug">
+                  طراحی و چاپ آزمون‌های استاندارد A4 با پاسخ‌نامه
+                </p>
+              </div>
+              <div className="w-10 h-10 rounded-2xl bg-white/20 flex items-center justify-center text-xl shrink-0 group-hover:bg-white group-hover:text-emerald-900 transition-colors">
+                📄
+              </div>
+            </button>
+          )}
+        </div>
 
         {/* Banner */}
         <div className="bg-gradient-to-br from-sky-400 via-blue-500 to-indigo-500 text-white rounded-3xl p-6 shadow-lg border-4 border-sky-300 relative overflow-hidden space-y-2">
