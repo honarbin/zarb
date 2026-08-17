@@ -397,9 +397,6 @@ export const GameCharacter: React.FC<GameCharacterProps> = ({
             transform: 'scale(1.02)', // Extra cute and chubby proportion
           }}
           referrerPolicy="no-referrer"
-          onError={(e) => {
-            (e.currentTarget as HTMLImageElement).src = '/fox.png';
-          }}
         />
       </div>
     );
@@ -431,9 +428,6 @@ export const GameCharacter: React.FC<GameCharacterProps> = ({
             transform: 'scale(1.02)',
           }}
           referrerPolicy="no-referrer"
-          onError={(e) => {
-            (e.currentTarget as HTMLImageElement).src = '/panda.png';
-          }}
         />
       </div>
     );
@@ -465,9 +459,6 @@ export const GameCharacter: React.FC<GameCharacterProps> = ({
             transform: 'scale(1.02)',
           }}
           referrerPolicy="no-referrer"
-          onError={(e) => {
-            (e.currentTarget as HTMLImageElement).src = '/cat.png';
-          }}
         />
       </div>
     );
